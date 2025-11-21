@@ -160,17 +160,66 @@ export const AssemblerTool = () => {
   };
 
   const handleDownload = () => {
-    if (!assemblyCode) return;
-    const blob = new Blob([assemblyCode], { type: 'text/plain' });
+    if (!assemblyCode && downloadFormat !== 'hex' && downloadFormat !== 'bin') return;
+    
+    let blob: Blob;
+    let filename: string;
+    
+    if (downloadFormat === 'hex') {
+      // Generate Intel HEX format from binary data
+      const hexLines: string[] = [];
+      const bytesPerLine = 16;
+      
+      for (let i = 0; i < 65536; i += bytesPerLine) {
+        // Skip lines with all zeros
+        const lineData = binaryData.slice(i, i + bytesPerLine);
+        const hasData = lineData.some(byte => byte !== 0);
+        
+        if (hasData) {
+          const byteCount = Math.min(bytesPerLine, 65536 - i);
+          const address = i;
+          const recordType = 0x00; // Data record
+          
+          // Build the data part
+          const dataBytes = Array.from(binaryData.slice(i, i + byteCount));
+          
+          // Calculate checksum
+          let checksum = byteCount + (address >> 8) + (address & 0xFF) + recordType;
+          dataBytes.forEach(byte => checksum += byte);
+          checksum = (0x100 - (checksum & 0xFF)) & 0xFF;
+          
+          // Format the line
+          const line = ':' +
+            byteCount.toString(16).toUpperCase().padStart(2, '0') +
+            address.toString(16).toUpperCase().padStart(4, '0') +
+            recordType.toString(16).toUpperCase().padStart(2, '0') +
+            dataBytes.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join('') +
+            checksum.toString(16).toUpperCase().padStart(2, '0');
+          
+          hexLines.push(line);
+        }
+      }
+      
+      // Add end-of-file record
+      hexLines.push(':00000001FF');
+      
+      blob = new Blob([hexLines.join('\n')], { type: 'text/plain' });
+      filename = 'machine_code.hex';
+    } else {
+      // Default: download assembly code
+      blob = new Blob([assemblyCode], { type: 'text/plain' });
+      filename = 'assembly_code.asm';
+    }
+    
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'assembly_code.asm';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Downloaded assembly code!");
+    toast.success(`Downloaded ${filename}!`);
   };
 
   return (
@@ -359,7 +408,7 @@ export const AssemblerTool = () => {
                     <SelectItem value="vhdl">.vhdl</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={!assemblyCode}>
+                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={downloadFormat === 'hex' ? false : !assemblyCode}>
                   <Download className="w-4 h-4" />
                   Download
                 </Button>
