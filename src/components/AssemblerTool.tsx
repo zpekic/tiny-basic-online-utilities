@@ -184,11 +184,10 @@ export const AssemblerTool = () => {
                   >
                     <label htmlFor="file-upload-assemble" className="cursor-pointer">
                       <Upload className="w-3 h-3" />
-                      Upload File
+                      Upload Source File
                       <input
                         id="file-upload-assemble"
                         type="file"
-                        accept=".asm,.s,.txt"
                         onChange={handleFileUpload}
                         className="hidden"
                       />
@@ -252,11 +251,10 @@ export const AssemblerTool = () => {
                   >
                     <label htmlFor="file-upload-hex" className="cursor-pointer">
                       <Upload className="w-3 h-3" />
-                      Upload File
+                      Upload Source File
                       <input
                         id="file-upload-hex"
                         type="file"
-                        accept=".hex,.txt"
                         onChange={handleFileUpload}
                         className="hidden"
                       />
