@@ -14,7 +14,7 @@ export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const { binaryData, setBinaryData } = useBinaryData();
+  const { binaryData, setBinaryData, assemblyCode, setAssemblyCode } = useBinaryData();
 
   // Sync binary data with output when in assemble mode
   useEffect(() => {
@@ -196,8 +196,8 @@ export const AssemblerTool = () => {
                   </Button>
                 </div>
                 <LineNumberTextarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  value={assemblyCode}
+                  onChange={(e) => setAssemblyCode(e.target.value)}
                   placeholder="Enter assembly code here...&#10;&#10;Example:&#10;MOV R0, #5&#10;ADD R1, R0, #3"
                   className="font-mono text-sm bg-code-bg border-code-border"
                 />
@@ -308,7 +308,7 @@ export const AssemblerTool = () => {
                   </div>
                 </div>
                 <LineNumberTextarea
-                  value={output}
+                  value={assemblyCode}
                   readOnly
                   placeholder="Assembly code will appear here..."
                   className="font-mono text-sm bg-code-bg border-code-border text-accent"
