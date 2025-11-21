@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, ArrowLeftRight, Trash2, Code2, Binary } from "lucide-react";
+import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { assemble, disassemble } from "@/lib/assembler";
 
@@ -13,19 +13,32 @@ export const AssemblerTool = () => {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
 
-  const exampleAssembly = `MOV R0, #5
-ADD R1, R0, #3
-SUB R2, R1, R0
-MUL R3, R1, R2
-STR R3, [R4]
-LDR R5, [R4]`;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const exampleMachineCode = `E3A00005
-E2811003
-E0412000
-E0031192
-E5843000
-E5945000`;
+    const maxSize = 64 * 1024; // 64KB
+    if (file.size > maxSize) {
+      toast.error("File size exceeds 64KB limit");
+      e.target.value = ""; // Reset input
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setInput(content);
+      setOutput("");
+      toast.success(`Loaded ${file.name}`);
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read file");
+    };
+    reader.readAsText(file);
+    
+    // Reset input to allow re-uploading the same file
+    e.target.value = "";
+  };
 
   const handleConvert = () => {
     try {
@@ -56,11 +69,6 @@ E5945000`;
     toast("Cleared");
   };
 
-  const loadExample = () => {
-    setInput(mode === "assemble" ? exampleAssembly : exampleMachineCode);
-    setOutput("");
-  };
-
   return (
     <div className="space-y-6">
       <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
@@ -84,10 +92,20 @@ E5945000`;
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={loadExample}
-                    className="h-8 text-xs"
+                    asChild
+                    className="h-8 text-xs gap-2"
                   >
-                    Load Example
+                    <label htmlFor="file-upload-assemble" className="cursor-pointer">
+                      <Upload className="w-3 h-3" />
+                      Upload File
+                      <input
+                        id="file-upload-assemble"
+                        type="file"
+                        accept=".asm,.s,.txt"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
                   </Button>
                 </div>
                 <LineNumberTextarea
@@ -134,10 +152,20 @@ E5945000`;
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={loadExample}
-                    className="h-8 text-xs"
+                    asChild
+                    className="h-8 text-xs gap-2"
                   >
-                    Load Example
+                    <label htmlFor="file-upload-hex" className="cursor-pointer">
+                      <Upload className="w-3 h-3" />
+                      Upload File
+                      <input
+                        id="file-upload-hex"
+                        type="file"
+                        accept=".hex,.txt"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
                   </Button>
                 </div>
                 <Textarea
@@ -153,16 +181,36 @@ E5945000`;
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-accent">Assembly Code</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopy}
-                    disabled={!output}
-                    className="h-8 gap-2"
-                  >
-                    <Copy className="w-3 h-3" />
-                    Copy
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="h-8 text-xs gap-2"
+                    >
+                      <label htmlFor="file-upload-disassemble" className="cursor-pointer">
+                        <Upload className="w-3 h-3" />
+                        Upload
+                        <input
+                          id="file-upload-disassemble"
+                          type="file"
+                          accept=".hex,.txt"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopy}
+                      disabled={!output}
+                      className="h-8 gap-2"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Copy
+                    </Button>
+                  </div>
                 </div>
                 <LineNumberTextarea
                   value={output}
