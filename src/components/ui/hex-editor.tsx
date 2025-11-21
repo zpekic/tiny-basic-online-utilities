@@ -74,7 +74,7 @@ const HexEditor = React.forwardRef<HTMLDivElement, HexEditorProps>(
                 <div key={rowIndex} className="flex gap-2 px-2 py-0.5 hover:bg-muted/50">
                   {/* Offset */}
                   <div className="w-20 text-muted-foreground">
-                    {offset.toString(16).padStart(8, "0").toUpperCase()}
+                    {offset.toString(16).padStart(4, "0").toUpperCase()}
                   </div>
 
                   {/* Hex bytes */}
