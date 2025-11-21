@@ -51,7 +51,7 @@ const HexEditor = React.forwardRef<HTMLDivElement, HexEditorProps>(
     return (
       <div ref={ref} className={cn("hex-editor", className)}>
         <ScrollArea className="h-[400px] w-full border border-input rounded-md bg-code-bg">
-          <div className="font-mono text-xs">
+          <div className="font-mono text-xs min-w-max">{/* Changed from just font-mono text-xs */}
             {/* Header */}
             <div className="sticky top-0 bg-muted/80 backdrop-blur-sm border-b border-border px-2 py-1 flex gap-2">
               <div className="w-20 text-muted-foreground">Offset</div>
