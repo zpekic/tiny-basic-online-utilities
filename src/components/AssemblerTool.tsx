@@ -244,6 +244,23 @@ export const AssemblerTool = () => {
     }
   };
 
+  const handleAssemblyDownload = () => {
+    if (!assemblyCode) return;
+    
+    const blob = new Blob([assemblyCode], { type: 'text/plain' });
+    const filename = 'assembly_code.tba';
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Downloaded ${filename}!`);
+  };
+
   const handleDownload = () => {
     if (!assemblyCode && downloadFormat !== 'hex' && downloadFormat !== 'bin' && downloadFormat !== 'vhdl') return;
     
@@ -455,7 +472,7 @@ export const AssemblerTool = () => {
                   <Copy className="w-4 h-4" />
                   Copy
                 </Button>
-                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={!assemblyCode}>
+                <Button variant="outline" className="gap-2" onClick={handleAssemblyDownload} disabled={!assemblyCode}>
                   <Download className="w-4 h-4" />
                   Download
                 </Button>
