@@ -57,6 +57,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "code-bg": "hsl(var(--code-bg))",
+        "code-border": "hsl(var(--code-border))",
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+      },
+      fontFamily: {
+        mono: ["JetBrains Mono", "Fira Code", "Consolas", "Monaco", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",
