@@ -5,7 +5,7 @@ import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
 import { HexEditor } from "@/components/ui/hex-editor";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload } from "lucide-react";
+import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 import { assemble, disassemble } from "@/lib/assembler";
 import { useBinaryData } from "@/contexts/BinaryDataContext";
@@ -157,6 +157,20 @@ export const AssemblerTool = () => {
     toast.success("Copied to clipboard!");
   };
 
+  const handleDownload = () => {
+    if (!assemblyCode) return;
+    const blob = new Blob([assemblyCode], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'assembly_code.asm';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Downloaded assembly code!");
+  };
+
   return (
     <div className="space-y-6">
       <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
@@ -246,6 +260,14 @@ export const AssemblerTool = () => {
                 </Button>
                 <Button variant="outline" className="gap-2">
                   Pass 2
+                </Button>
+                <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </Button>
+                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={!assemblyCode}>
+                  <Download className="w-4 h-4" />
+                  Download
                 </Button>
               </div>
             </div>
