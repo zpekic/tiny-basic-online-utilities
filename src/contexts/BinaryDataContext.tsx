@@ -5,6 +5,8 @@ interface BinaryDataContextType {
   setBinaryData: (data: Uint8Array) => void;
   assemblyCode: string;
   setAssemblyCode: (code: string) => void;
+  orgValue: number;
+  setOrgValue: (value: number) => void;
 }
 
 const BinaryDataContext = createContext<BinaryDataContextType | undefined>(undefined);
@@ -12,9 +14,10 @@ const BinaryDataContext = createContext<BinaryDataContextType | undefined>(undef
 export const BinaryDataProvider = ({ children }: { children: ReactNode }) => {
   const [binaryData, setBinaryData] = useState<Uint8Array>(() => new Uint8Array(65536));
   const [assemblyCode, setAssemblyCode] = useState<string>("");
+  const [orgValue, setOrgValue] = useState<number>(0);
 
   return (
-    <BinaryDataContext.Provider value={{ binaryData, setBinaryData, assemblyCode, setAssemblyCode }}>
+    <BinaryDataContext.Provider value={{ binaryData, setBinaryData, assemblyCode, setAssemblyCode, orgValue, setOrgValue }}>
       {children}
     </BinaryDataContext.Provider>
   );

@@ -12,7 +12,7 @@ import { useBinaryData } from "@/contexts/BinaryDataContext";
 
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
-  const { binaryData, setBinaryData, assemblyCode, setAssemblyCode } = useBinaryData();
+  const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   // Auto-assemble when assembly code changes
   useEffect(() => {
@@ -74,6 +74,7 @@ export const AssemblerTool = () => {
     reader.onload = (event) => {
       const content = event.target?.result as string;
       setAssemblyCode(content);
+      setOrgValue(0);
       toast.success(`Loaded ${file.name}`);
     };
     reader.onerror = () => {
