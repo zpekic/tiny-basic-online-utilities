@@ -8,12 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { assemble, disassemble } from "@/lib/assembler";
+import { useBinaryData } from "@/contexts/BinaryDataContext";
 
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [binaryData, setBinaryData] = useState<Uint8Array>(() => new Uint8Array(65536));
+  const { binaryData, setBinaryData } = useBinaryData();
 
   // Sync binary data with output when in assemble mode
   useEffect(() => {
