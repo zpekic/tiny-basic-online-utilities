@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 export interface HexEditorProps {
@@ -115,6 +115,7 @@ const HexEditor = React.forwardRef<HTMLDivElement, HexEditorProps>(
               );
             })}
           </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
     );
