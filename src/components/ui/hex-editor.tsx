@@ -45,7 +45,7 @@ const HexEditor = React.forwardRef<HTMLDivElement, HexEditorProps>(
     };
 
     const toAscii = (byte: number): string => {
-      return byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : ".";
+      return byte >= 32 && byte <= 127 ? String.fromCharCode(byte) : ".";
     };
 
     return (
