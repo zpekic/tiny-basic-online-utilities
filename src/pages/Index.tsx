@@ -14,8 +14,8 @@ const Index = () => {
                 <Cpu className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">TBOU</h1>
-                <p className="text-xs text-muted-foreground">Tiny Basic Online Utilities</p>
+                <h1 className="text-xl font-bold text-foreground">Tiny Basic Online Utilities</h1>
+                <p className="text-xs text-muted-foreground">Companion to Basic CPU</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
