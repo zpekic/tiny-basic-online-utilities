@@ -61,6 +61,71 @@ export const AssemblerTool = () => {
     e.target.value = "";
   };
 
+  const handleBinaryFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 64 * 1024; // 64KB
+    if (file.size > maxSize) {
+      toast.error("File size exceeds 64KB limit");
+      e.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    
+    if (file.name.endsWith('.bin')) {
+      // Read as binary
+      reader.onload = (event) => {
+        const arrayBuffer = event.target?.result as ArrayBuffer;
+        const fileData = new Uint8Array(arrayBuffer);
+        const newData = new Uint8Array(65536);
+        newData.set(fileData.slice(0, Math.min(fileData.length, 65536)));
+        setBinaryData(newData);
+        toast.success(`Loaded ${file.name} (${fileData.length} bytes)`);
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (file.name.endsWith('.hex')) {
+      // Read as Intel HEX format
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        const newData = new Uint8Array(65536);
+        
+        try {
+          const lines = content.split('\n');
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith(':')) continue;
+            
+            const byteCount = parseInt(trimmed.substring(1, 3), 16);
+            const address = parseInt(trimmed.substring(3, 7), 16);
+            const recordType = parseInt(trimmed.substring(7, 9), 16);
+            
+            if (recordType === 0) { // Data record
+              for (let i = 0; i < byteCount; i++) {
+                const byteValue = parseInt(trimmed.substring(9 + i * 2, 11 + i * 2), 16);
+                if (address + i < 65536) {
+                  newData[address + i] = byteValue;
+                }
+              }
+            }
+          }
+          setBinaryData(newData);
+          toast.success(`Loaded ${file.name}`);
+        } catch (error) {
+          toast.error("Failed to parse Intel HEX file");
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    reader.onerror = () => {
+      toast.error("Failed to read file");
+    };
+    
+    e.target.value = "";
+  };
+
   const handleConvert = () => {
     try {
       if (mode === "assemble") {
@@ -145,12 +210,20 @@ export const AssemblerTool = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleCopy}
-                    disabled={!output}
-                    className="h-8 gap-2"
+                    asChild
+                    className="h-8 text-xs gap-2"
                   >
-                    <Copy className="w-3 h-3" />
-                    Copy
+                    <label htmlFor="file-upload-binary" className="cursor-pointer">
+                      <Upload className="w-3 h-3" />
+                      Upload
+                      <input
+                        id="file-upload-binary"
+                        type="file"
+                        accept=".bin,.hex"
+                        onChange={handleBinaryFileUpload}
+                        className="hidden"
+                      />
+                    </label>
                   </Button>
                 </div>
                 <HexEditor
