@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
+import { HexEditor } from "@/components/ui/hex-editor";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload } from "lucide-react";
@@ -12,6 +13,26 @@ export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
+  const [binaryData, setBinaryData] = useState<Uint8Array>(() => new Uint8Array(65536));
+
+  // Sync binary data with output when in assemble mode
+  useEffect(() => {
+    if (mode === "assemble" && output) {
+      const newData = new Uint8Array(65536);
+      const lines = output.split("\n").filter(line => line.trim());
+      lines.forEach((line, index) => {
+        const hexValue = parseInt(line.trim(), 16);
+        if (!isNaN(hexValue) && index * 4 < 65536) {
+          // Store as 4 bytes (32-bit instruction)
+          newData[index * 4] = (hexValue >> 24) & 0xFF;
+          newData[index * 4 + 1] = (hexValue >> 16) & 0xFF;
+          newData[index * 4 + 2] = (hexValue >> 8) & 0xFF;
+          newData[index * 4 + 3] = hexValue & 0xFF;
+        }
+      });
+      setBinaryData(newData);
+    }
+  }, [output, mode]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -132,11 +153,11 @@ export const AssemblerTool = () => {
                     Copy
                   </Button>
                 </div>
-                <Textarea
-                  value={output}
+                <HexEditor
+                  data={binaryData}
+                  onChange={setBinaryData}
                   readOnly
-                  placeholder="Machine code will appear here..."
-                  className="min-h-[400px] font-mono text-sm bg-code-bg border-code-border resize-none text-accent"
+                  className="w-full"
                 />
               </div>
             </Card>
