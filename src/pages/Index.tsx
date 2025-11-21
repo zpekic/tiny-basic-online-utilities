@@ -19,7 +19,12 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => window.open("https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic", "_blank")}
+              >
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">Docs</span>
               </Button>
