@@ -205,6 +205,10 @@ export const AssemblerTool = () => {
       
       blob = new Blob([hexLines.join('\n')], { type: 'text/plain' });
       filename = 'machine_code.hex';
+    } else if (downloadFormat === 'bin') {
+      // Export raw binary data
+      blob = new Blob([new Uint8Array(binaryData)], { type: 'application/octet-stream' });
+      filename = 'machine_code.bin';
     } else {
       // Default: download assembly code
       blob = new Blob([assemblyCode], { type: 'text/plain' });
@@ -408,7 +412,7 @@ export const AssemblerTool = () => {
                     <SelectItem value="vhdl">.vhdl</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={downloadFormat === 'hex' ? false : !assemblyCode}>
+                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={downloadFormat === 'hex' || downloadFormat === 'bin' ? false : !assemblyCode}>
                   <Download className="w-4 h-4" />
                   Download
                 </Button>
