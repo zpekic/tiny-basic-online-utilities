@@ -160,7 +160,7 @@ export const AssemblerTool = () => {
   };
 
   const handleDownload = () => {
-    if (!assemblyCode && downloadFormat !== 'hex' && downloadFormat !== 'bin') return;
+    if (!assemblyCode && downloadFormat !== 'hex' && downloadFormat !== 'bin' && downloadFormat !== 'vhdl') return;
     
     let blob: Blob;
     let filename: string;
@@ -209,6 +209,56 @@ export const AssemblerTool = () => {
       // Export raw binary data
       blob = new Blob([new Uint8Array(binaryData)], { type: 'application/octet-stream' });
       filename = 'machine_code.bin';
+    } else if (downloadFormat === 'vhdl') {
+      // Generate VHDL ROM file
+      const vhdlLines: string[] = [];
+      
+      // Header
+      vhdlLines.push('----------------------------------------------------------------------------------');
+      vhdlLines.push('-- Generated VHDL ROM file');
+      vhdlLines.push('-- Create Date: ' + new Date().toLocaleString());
+      vhdlLines.push('----------------------------------------------------------------------------------');
+      vhdlLines.push('library IEEE;');
+      vhdlLines.push('use IEEE.STD_LOGIC_1164.ALL;');
+      vhdlLines.push('use IEEE.NUMERIC_STD.ALL;');
+      vhdlLines.push('');
+      vhdlLines.push('entity il_rom is');
+      vhdlLines.push('    Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);');
+      vhdlLines.push('           d : out  STD_LOGIC_VECTOR (7 downto 0);');
+      vhdlLines.push('           a_valid: out STD_LOGIC);');
+      vhdlLines.push('end il_rom;');
+      vhdlLines.push('');
+      vhdlLines.push('architecture Behavioral of il_rom is');
+      vhdlLines.push('');
+      vhdlLines.push('type rom_array is array (0 to 511) of STD_LOGIC_VECTOR(7 downto 0);');
+      vhdlLines.push('constant il_rom: rom_array := (');
+      
+      // Generate ROM data - 15 values per line
+      const romLines: string[] = [];
+      for (let i = 0; i < 512; i++) {
+        const value = binaryData[i];
+        const hexValue = 'X"' + value.toString(16).toUpperCase().padStart(2, '0') + '"';
+        romLines.push(hexValue);
+      }
+      
+      // Format with 15 values per line
+      for (let i = 0; i < romLines.length; i += 15) {
+        const chunk = romLines.slice(i, i + 15);
+        const line = '\t\t' + chunk.join(', ') + (i + 15 < romLines.length ? ',' : '');
+        vhdlLines.push(line);
+      }
+      
+      vhdlLines.push(');');
+      vhdlLines.push('');
+      vhdlLines.push('begin');
+      vhdlLines.push('');
+      vhdlLines.push('\td <= il_rom(to_integer(unsigned(a(8 downto 0))));');
+      vhdlLines.push('\ta_valid <= \'1\' when (unsigned(a) < 512) else \'0\';');
+      vhdlLines.push('');
+      vhdlLines.push('end Behavioral;');
+      
+      blob = new Blob([vhdlLines.join('\n')], { type: 'text/plain' });
+      filename = 'il_rom.vhd';
     } else {
       // Default: download assembly code
       blob = new Blob([assemblyCode], { type: 'text/plain' });
@@ -412,7 +462,7 @@ export const AssemblerTool = () => {
                     <SelectItem value="vhdl">.vhdl</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={downloadFormat === 'hex' || downloadFormat === 'bin' ? false : !assemblyCode}>
+                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={downloadFormat === 'hex' || downloadFormat === 'bin' || downloadFormat === 'vhdl' ? false : !assemblyCode}>
                   <Download className="w-4 h-4" />
                   Download
                 </Button>
