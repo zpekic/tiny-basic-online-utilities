@@ -63,27 +63,6 @@ const Index = () => {
           {/* Tool */}
           <AssemblerTool />
 
-          {/* Info Section */}
-          <div className="grid md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2 text-primary">Assembly Format</h4>
-              <p className="text-xs text-muted-foreground">
-                Write one instruction per line. Use standard ARM-like syntax with registers (R0-R15) and immediate values (#0-255).
-              </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2 text-accent">Machine Code Format</h4>
-              <p className="text-xs text-muted-foreground">
-                Enter hexadecimal machine code (8 characters per line). Each line represents a 32-bit encoded instruction.
-              </p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2 text-success">Quick Tips</h4>
-              <p className="text-xs text-muted-foreground">
-                Use Load Example to see sample code. Comments starting with ; are ignored in assembly mode.
-              </p>
-            </div>
-          </div>
         </div>
       </main>
 
