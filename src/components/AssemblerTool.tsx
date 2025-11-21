@@ -49,7 +49,7 @@ export const AssemblerTool = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      setInput(content);
+      setAssemblyCode(content);
       setOutput("");
       toast.success(`Loaded ${file.name}`);
     };
