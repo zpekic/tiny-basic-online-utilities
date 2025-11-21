@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, ArrowLeftRight, Trash2, Code2, Binary } from "lucide-react";
@@ -89,11 +90,11 @@ E5945000`;
                     Load Example
                   </Button>
                 </div>
-                <Textarea
+                <LineNumberTextarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Enter assembly code here...&#10;&#10;Example:&#10;MOV R0, #5&#10;ADD R1, R0, #3"
-                  className="min-h-[400px] font-mono text-sm bg-code-bg border-code-border resize-none"
+                  className="font-mono text-sm bg-code-bg border-code-border"
                 />
               </div>
             </Card>
@@ -163,11 +164,11 @@ E5945000`;
                     Copy
                   </Button>
                 </div>
-                <Textarea
+                <LineNumberTextarea
                   value={output}
                   readOnly
                   placeholder="Assembly code will appear here..."
-                  className="min-h-[400px] font-mono text-sm bg-code-bg border-code-border resize-none text-accent"
+                  className="font-mono text-sm bg-code-bg border-code-border text-accent"
                 />
               </div>
             </Card>
