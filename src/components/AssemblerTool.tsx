@@ -278,19 +278,26 @@ export const AssemblerTool = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleCopy}
-                    disabled={!assemblyCode}
-                    className="h-8 gap-2"
+                    asChild
+                    className="h-8 text-xs gap-2"
                   >
-                    <Copy className="w-3 h-3" />
-                    Copy
+                    <label htmlFor="file-upload-assemble-disassemble" className="cursor-pointer">
+                      <Upload className="w-3 h-3" />
+                      Upload Source File
+                      <input
+                        id="file-upload-assemble-disassemble"
+                        type="file"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
                   </Button>
                 </div>
                 <LineNumberTextarea
                   value={assemblyCode}
-                  readOnly
-                  placeholder="Assembly code will appear here..."
-                  className="font-mono text-sm bg-code-bg border-code-border text-accent"
+                  onChange={(e) => setAssemblyCode(e.target.value)}
+                  placeholder="Enter assembly code here..."
+                  className="font-mono text-sm bg-code-bg border-code-border"
                 />
               </div>
             </Card>
