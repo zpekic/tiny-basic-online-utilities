@@ -5,6 +5,7 @@ import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
 import { HexEditor } from "@/components/ui/hex-editor";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
 import { assemble, disassemble } from "@/lib/assembler";
@@ -12,6 +13,7 @@ import { useBinaryData } from "@/contexts/BinaryDataContext";
 
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
+  const [downloadFormat, setDownloadFormat] = useState<"hex" | "bin" | "vhdl">("hex");
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   // Auto-assemble when assembly code changes
@@ -342,11 +344,21 @@ export const AssemblerTool = () => {
           <Card className="p-6 bg-card border-code-border">
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-primary">Disassembly Tools</h3>
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
                 <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
                   <Copy className="w-4 h-4" />
                   Copy
                 </Button>
+                <Select value={downloadFormat} onValueChange={(value: "hex" | "bin" | "vhdl") => setDownloadFormat(value)}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-border z-50">
+                    <SelectItem value="hex">.hex</SelectItem>
+                    <SelectItem value="bin">.bin</SelectItem>
+                    <SelectItem value="vhdl">.vhdl</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={!assemblyCode}>
                   <Download className="w-4 h-4" />
                   Download
