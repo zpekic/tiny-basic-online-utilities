@@ -3,15 +3,18 @@ import { createContext, useContext, useState, ReactNode } from "react";
 interface BinaryDataContextType {
   binaryData: Uint8Array;
   setBinaryData: (data: Uint8Array) => void;
+  assemblyCode: string;
+  setAssemblyCode: (code: string) => void;
 }
 
 const BinaryDataContext = createContext<BinaryDataContextType | undefined>(undefined);
 
 export const BinaryDataProvider = ({ children }: { children: ReactNode }) => {
   const [binaryData, setBinaryData] = useState<Uint8Array>(() => new Uint8Array(65536));
+  const [assemblyCode, setAssemblyCode] = useState<string>("");
 
   return (
-    <BinaryDataContext.Provider value={{ binaryData, setBinaryData }}>
+    <BinaryDataContext.Provider value={{ binaryData, setBinaryData, assemblyCode, setAssemblyCode }}>
       {children}
     </BinaryDataContext.Provider>
   );
