@@ -28,7 +28,12 @@ const Index = () => {
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">Docs</span>
               </Button>
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => window.open("https://github.com/zpekic/Sys_MicroBasic", "_blank")}
+              >
                 <Github className="w-4 h-4" />
                 <span className="hidden sm:inline">GitHub</span>
               </Button>
