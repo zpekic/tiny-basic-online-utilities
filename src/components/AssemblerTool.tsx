@@ -215,7 +215,7 @@ export const AssemblerTool = () => {
                   >
                     <label htmlFor="file-upload-binary" className="cursor-pointer">
                       <Upload className="w-3 h-3" />
-                      Upload
+                      Upload Binary or Hex File
                       <input
                         id="file-upload-binary"
                         type="file"
