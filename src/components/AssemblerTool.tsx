@@ -316,27 +316,6 @@ export const AssemblerTool = () => {
           </div>
         </TabsContent>
       </Tabs>
-
-      <div className="flex justify-center gap-3">
-        <Button
-          onClick={handleConvert}
-          disabled={!input}
-          size="lg"
-          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <ArrowLeftRight className="w-4 h-4" />
-          Convert
-        </Button>
-        <Button
-          onClick={handleClear}
-          variant="outline"
-          size="lg"
-          className="gap-2"
-        >
-          <Trash2 className="w-4 h-4" />
-          Clear
-        </Button>
-      </div>
     </div>
   );
 };
