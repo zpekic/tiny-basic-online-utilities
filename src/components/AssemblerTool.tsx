@@ -206,7 +206,7 @@ export const AssemblerTool = () => {
             <Card className="p-6 bg-card border-code-border">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-accent">Machine Code (Hex)</h3>
+                  <h3 className="text-sm font-semibold text-accent">Machine Code</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -242,7 +242,7 @@ export const AssemblerTool = () => {
             <Card className="p-6 bg-card border-code-border">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-accent">Machine Code (Hex)</h3>
+                  <h3 className="text-sm font-semibold text-accent">Machine Code</h3>
                   <Button
                     variant="ghost"
                     size="sm"
