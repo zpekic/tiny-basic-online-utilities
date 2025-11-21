@@ -12,28 +12,52 @@ import { useBinaryData } from "@/contexts/BinaryDataContext";
 
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode } = useBinaryData();
 
-  // Sync binary data with output when in assemble mode
+  // Auto-assemble when assembly code changes
   useEffect(() => {
-    if (mode === "assemble" && output) {
-      const newData = new Uint8Array(65536);
-      const lines = output.split("\n").filter(line => line.trim());
-      lines.forEach((line, index) => {
-        const hexValue = parseInt(line.trim(), 16);
-        if (!isNaN(hexValue) && index * 4 < 65536) {
-          // Store as 4 bytes (32-bit instruction)
-          newData[index * 4] = (hexValue >> 24) & 0xFF;
-          newData[index * 4 + 1] = (hexValue >> 16) & 0xFF;
-          newData[index * 4 + 2] = (hexValue >> 8) & 0xFF;
-          newData[index * 4 + 3] = hexValue & 0xFF;
-        }
-      });
-      setBinaryData(newData);
+    if (mode === "assemble" && assemblyCode.trim()) {
+      try {
+        const machineCode = assemble(assemblyCode);
+        const newData = new Uint8Array(65536);
+        const lines = machineCode.split("\n").filter(line => line.trim());
+        lines.forEach((line, index) => {
+          const hexValue = parseInt(line.trim(), 16);
+          if (!isNaN(hexValue) && index * 4 < 65536) {
+            newData[index * 4] = (hexValue >> 24) & 0xFF;
+            newData[index * 4 + 1] = (hexValue >> 16) & 0xFF;
+            newData[index * 4 + 2] = (hexValue >> 8) & 0xFF;
+            newData[index * 4 + 3] = hexValue & 0xFF;
+          }
+        });
+        setBinaryData(newData);
+      } catch (error) {
+        // Silent fail during typing
+      }
     }
-  }, [output, mode]);
+  }, [assemblyCode, mode]);
+
+  // Auto-disassemble when binary data changes in disassemble mode
+  useEffect(() => {
+    if (mode === "disassemble") {
+      try {
+        const hexLines: string[] = [];
+        for (let i = 0; i < 65536; i += 4) {
+          const instruction = (binaryData[i] << 24) | (binaryData[i + 1] << 16) | 
+                            (binaryData[i + 2] << 8) | binaryData[i + 3];
+          if (instruction !== 0) {
+            hexLines.push(instruction.toString(16).toUpperCase().padStart(8, '0'));
+          }
+        }
+        if (hexLines.length > 0) {
+          const disassembled = disassemble(hexLines.join("\n"));
+          setAssemblyCode(disassembled);
+        }
+      } catch (error) {
+        // Silent fail
+      }
+    }
+  }, [binaryData, mode]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,7 +74,6 @@ export const AssemblerTool = () => {
     reader.onload = (event) => {
       const content = event.target?.result as string;
       setAssemblyCode(content);
-      setOutput("");
       toast.success(`Loaded ${file.name}`);
     };
     reader.onerror = () => {
@@ -127,33 +150,10 @@ export const AssemblerTool = () => {
     e.target.value = "";
   };
 
-  const handleConvert = () => {
-    try {
-      if (mode === "assemble") {
-        const result = assemble(input);
-        setOutput(result);
-        toast.success("Assembly code converted to machine code!");
-      } else {
-        const result = disassemble(input);
-        setOutput(result);
-        toast.success("Machine code disassembled successfully!");
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Conversion failed");
-      setOutput("");
-    }
-  };
-
   const handleCopy = async () => {
-    if (!output) return;
-    await navigator.clipboard.writeText(output);
+    if (!assemblyCode) return;
+    await navigator.clipboard.writeText(assemblyCode);
     toast.success("Copied to clipboard!");
-  };
-
-  const handleClear = () => {
-    setInput("");
-    setOutput("");
-    toast("Cleared");
   };
 
   return (
@@ -249,23 +249,23 @@ export const AssemblerTool = () => {
                     asChild
                     className="h-8 text-xs gap-2"
                   >
-                    <label htmlFor="file-upload-hex" className="cursor-pointer">
+                    <label htmlFor="file-upload-binary-disassemble" className="cursor-pointer">
                       <Upload className="w-3 h-3" />
-                      Upload Source File
+                      Upload Binary or Hex File
                       <input
-                        id="file-upload-hex"
+                        id="file-upload-binary-disassemble"
                         type="file"
-                        onChange={handleFileUpload}
+                        accept=".bin,.hex"
+                        onChange={handleBinaryFileUpload}
                         className="hidden"
                       />
                     </label>
                   </Button>
                 </div>
-                <Textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Enter machine code here...&#10;&#10;Example:&#10;E3A00005&#10;E2811003"
-                  className="min-h-[400px] font-mono text-sm bg-code-bg border-code-border resize-none"
+                <HexEditor
+                  data={binaryData}
+                  onChange={setBinaryData}
+                  className="w-full"
                 />
               </div>
             </Card>
@@ -274,36 +274,16 @@ export const AssemblerTool = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-primary">Assembly Code</h3>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      asChild
-                      className="h-8 text-xs gap-2"
-                    >
-                      <label htmlFor="file-upload-disassemble" className="cursor-pointer">
-                        <Upload className="w-3 h-3" />
-                        Upload
-                        <input
-                          id="file-upload-disassemble"
-                          type="file"
-                          accept=".hex,.txt"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                        />
-                      </label>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCopy}
-                      disabled={!output}
-                      className="h-8 gap-2"
-                    >
-                      <Copy className="w-3 h-3" />
-                      Copy
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopy}
+                    disabled={!assemblyCode}
+                    className="h-8 gap-2"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copy
+                  </Button>
                 </div>
                 <LineNumberTextarea
                   value={assemblyCode}
