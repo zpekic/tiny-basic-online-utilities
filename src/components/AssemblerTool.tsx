@@ -338,6 +338,22 @@ export const AssemblerTool = () => {
               </div>
             </Card>
           </div>
+
+          <Card className="p-6 bg-card border-code-border">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-primary">Disassembly Tools</h3>
+              <div className="flex gap-3">
+                <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </Button>
+                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={!assemblyCode}>
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
