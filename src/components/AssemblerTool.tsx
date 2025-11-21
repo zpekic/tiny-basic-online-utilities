@@ -236,6 +236,20 @@ export const AssemblerTool = () => {
               </div>
             </Card>
           </div>
+
+          <Card className="p-6 bg-card border-code-border">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-primary">Assembly Tools</h3>
+              <div className="flex gap-3">
+                <Button variant="outline" className="gap-2">
+                  Pass 1
+                </Button>
+                <Button variant="outline" className="gap-2">
+                  Pass 2
+                </Button>
+              </div>
+            </div>
+          </Card>
         </TabsContent>
 
         <TabsContent value="disassemble" className="space-y-4 mt-6">
