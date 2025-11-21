@@ -159,6 +159,91 @@ export const AssemblerTool = () => {
     toast.success("Copied to clipboard!");
   };
 
+  const handleDisassemblyCopy = async () => {
+    let content = '';
+    
+    if (downloadFormat === 'hex') {
+      // Generate Intel HEX format
+      const hexLines: string[] = [];
+      const bytesPerLine = 16;
+      
+      for (let i = 0; i < 65536; i += bytesPerLine) {
+        const lineData = binaryData.slice(i, i + bytesPerLine);
+        const hasData = lineData.some(byte => byte !== 0);
+        
+        if (hasData) {
+          const byteCount = Math.min(bytesPerLine, 65536 - i);
+          const address = i;
+          const recordType = 0x00;
+          const dataBytes = Array.from(binaryData.slice(i, i + byteCount));
+          
+          let checksum = byteCount + (address >> 8) + (address & 0xFF) + recordType;
+          dataBytes.forEach(byte => checksum += byte);
+          checksum = (0x100 - (checksum & 0xFF)) & 0xFF;
+          
+          const line = ':' +
+            byteCount.toString(16).toUpperCase().padStart(2, '0') +
+            address.toString(16).toUpperCase().padStart(4, '0') +
+            recordType.toString(16).toUpperCase().padStart(2, '0') +
+            dataBytes.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join('') +
+            checksum.toString(16).toUpperCase().padStart(2, '0');
+          
+          hexLines.push(line);
+        }
+      }
+      hexLines.push(':00000001FF');
+      content = hexLines.join('\n');
+    } else if (downloadFormat === 'vhdl') {
+      // Generate VHDL format
+      const vhdlLines: string[] = [];
+      vhdlLines.push('----------------------------------------------------------------------------------');
+      vhdlLines.push('-- Generated VHDL ROM file');
+      vhdlLines.push('-- Create Date: ' + new Date().toLocaleString());
+      vhdlLines.push('----------------------------------------------------------------------------------');
+      vhdlLines.push('library IEEE;');
+      vhdlLines.push('use IEEE.STD_LOGIC_1164.ALL;');
+      vhdlLines.push('use IEEE.NUMERIC_STD.ALL;');
+      vhdlLines.push('');
+      vhdlLines.push('entity il_rom is');
+      vhdlLines.push('    Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);');
+      vhdlLines.push('           d : out  STD_LOGIC_VECTOR (7 downto 0);');
+      vhdlLines.push('           a_valid: out STD_LOGIC);');
+      vhdlLines.push('end il_rom;');
+      vhdlLines.push('');
+      vhdlLines.push('architecture Behavioral of il_rom is');
+      vhdlLines.push('');
+      vhdlLines.push('type rom_array is array (0 to 511) of STD_LOGIC_VECTOR(7 downto 0);');
+      vhdlLines.push('constant il_rom: rom_array := (');
+      
+      const romLines: string[] = [];
+      for (let i = 0; i < 512; i++) {
+        const value = binaryData[i];
+        romLines.push('X"' + value.toString(16).toUpperCase().padStart(2, '0') + '"');
+      }
+      
+      for (let i = 0; i < romLines.length; i += 15) {
+        const chunk = romLines.slice(i, i + 15);
+        vhdlLines.push('\t\t' + chunk.join(', ') + (i + 15 < romLines.length ? ',' : ''));
+      }
+      
+      vhdlLines.push(');');
+      vhdlLines.push('');
+      vhdlLines.push('begin');
+      vhdlLines.push('');
+      vhdlLines.push('\td <= il_rom(to_integer(unsigned(a(8 downto 0))));');
+      vhdlLines.push('\ta_valid <= \'1\' when (unsigned(a) < 512) else \'0\';');
+      vhdlLines.push('');
+      vhdlLines.push('end Behavioral;');
+      
+      content = vhdlLines.join('\n');
+    }
+    
+    if (content) {
+      await navigator.clipboard.writeText(content);
+      toast.success(`Copied ${downloadFormat.toUpperCase()} to clipboard!`);
+    }
+  };
+
   const handleDownload = () => {
     if (!assemblyCode && downloadFormat !== 'hex' && downloadFormat !== 'bin' && downloadFormat !== 'vhdl') return;
     
@@ -448,7 +533,7 @@ export const AssemblerTool = () => {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-primary">Disassembly Tools</h3>
               <div className="flex gap-3 items-center">
-                <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
+                <Button variant="outline" className="gap-2" onClick={handleDisassemblyCopy} disabled={downloadFormat === 'bin'}>
                   <Copy className="w-4 h-4" />
                   Copy
                 </Button>
