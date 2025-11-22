@@ -590,7 +590,7 @@ export const AssemblerTool = () => {
                 <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()} onClick={handlePass1}>
                   Pass 1
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" disabled={!pass1Run || (pass1Result?.errorCount ?? 1) > 0}>
                   Pass 2
                 </Button>
                 <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
