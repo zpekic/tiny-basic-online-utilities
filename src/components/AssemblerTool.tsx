@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
@@ -19,6 +19,7 @@ export const AssemblerTool = () => {
   const [eventLog, setEventLog] = useState<string>("");
   const [pass1Result, setPass1Result] = useState<Pass1Result | null>(null);
   const [errorLines, setErrorLines] = useState<number[]>([]);
+  const [cursorPosition, setCursorPosition] = useState<number>(0);
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   const addLogEntry = (message: string) => {
@@ -164,9 +165,20 @@ export const AssemblerTool = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      setAssemblyCode(content);
-      setOrgValue(0);
-      addLogEntry(`Uploaded assembly file: ${file.name} (${file.size} bytes)`);
+      
+      if (assemblyCode.trim()) {
+        // Insert at cursor position if there's existing content
+        const before = assemblyCode.substring(0, cursorPosition);
+        const after = assemblyCode.substring(cursorPosition);
+        setAssemblyCode(before + content + after);
+        addLogEntry(`Inserted file: ${file.name} (${file.size} bytes) at cursor position`);
+      } else {
+        // Replace all if empty
+        setAssemblyCode(content);
+        setOrgValue(0);
+        addLogEntry(`Uploaded assembly file: ${file.name} (${file.size} bytes)`);
+      }
+      
       toast.success(`Loaded ${file.name}`);
     };
     reader.onerror = () => {
@@ -516,7 +528,11 @@ export const AssemblerTool = () => {
                   </div>
                   <LineNumberTextarea
                     value={assemblyCode}
-                    onChange={(e) => setAssemblyCode(e.target.value)}
+                    onChange={(e) => {
+                      setAssemblyCode(e.target.value);
+                      setCursorPosition(e.target.selectionStart);
+                    }}
+                    onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
                     placeholder="Upload or enter TBIL assembly code here..."
                     className="font-mono text-sm bg-code-bg border-code-border"
                     errorLines={errorLines}
