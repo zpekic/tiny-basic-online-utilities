@@ -54,7 +54,15 @@ const Index = () => {
               <div className="space-y-1 flex-1">
                 <h3 className="font-semibold text-sm">Supported Instructions</h3>
                 <p className="text-sm text-muted-foreground">
-                  MOV, ADD, SUB, MUL, LDR, STR • Registers: R0-R15 • Immediate values: #0-255
+                  Any valid Tiny Basic intermediate language instruction, see{" "}
+                  <a 
+                    href="http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TBEK.txt" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    here
+                  </a>
                 </p>
               </div>
             </div>
