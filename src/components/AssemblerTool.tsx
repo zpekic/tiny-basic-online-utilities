@@ -424,6 +424,7 @@ export const AssemblerTool = () => {
                       <input
                         id="file-upload-assemble"
                         type="file"
+                        accept=".tba"
                         onChange={handleFileUpload}
                         className="hidden"
                       />
@@ -553,6 +554,7 @@ export const AssemblerTool = () => {
                       <input
                         id="file-upload-assemble-disassemble"
                         type="file"
+                        accept=".tba"
                         onChange={handleFileUpload}
                         className="hidden"
                       />
