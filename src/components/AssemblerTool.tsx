@@ -17,6 +17,7 @@ export const AssemblerTool = () => {
   const [downloadFormat, setDownloadFormat] = useState<"hex" | "bin" | "vhdl">("hex");
   const [eventLog, setEventLog] = useState<string>("");
   const [pass1Result, setPass1Result] = useState<Pass1Result | null>(null);
+  const [errorLines, setErrorLines] = useState<number[]>([]);
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   const addLogEntry = (message: string) => {
@@ -25,8 +26,9 @@ export const AssemblerTool = () => {
   };
 
   const handlePass1 = () => {
-    // Clear event log
+    // Clear event log and error lines
     setEventLog('');
+    setErrorLines([]);
     
     // Set org_value to 0
     setOrgValue(0);
@@ -38,6 +40,16 @@ export const AssemblerTool = () => {
     // Run Pass 1
     const result = pass1(assemblyCode);
     setPass1Result(result);
+    
+    // Extract error line numbers from error messages
+    const errorLineNumbers: number[] = [];
+    result.errors.forEach(error => {
+      const match = error.match(/line (\d+)/);
+      if (match) {
+        errorLineNumbers.push(parseInt(match[1]));
+      }
+    });
+    setErrorLines(errorLineNumbers);
     
     // Display label dictionary
     addLogEntry('--- Label Dictionary ---');
@@ -505,6 +517,7 @@ export const AssemblerTool = () => {
                   onChange={(e) => setAssemblyCode(e.target.value)}
                   placeholder="Enter assembly code here...&#10;&#10;Example:&#10;MOV R0, #5&#10;ADD R1, R0, #3"
                   className="font-mono text-sm bg-code-bg border-code-border"
+                  errorLines={errorLines}
                 />
               </div>
             </Card>
