@@ -562,47 +562,36 @@ export const AssemblerTool = () => {
             </Panel>
           </PanelGroup>
 
-          <PanelGroup direction="vertical" className="gap-2">
-            <Panel defaultSize={70} minSize={30}>
-              <Card className="p-6 bg-card border-code-border h-full">
-                <div className="space-y-3 h-full flex flex-col">
-                  <h3 className="text-sm font-semibold text-primary">Assembly Tools</h3>
-                  <div className="flex gap-3">
-                    <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()} onClick={handlePass1}>
-                      Pass 1
-                    </Button>
-                    <Button variant="outline" className="gap-2">
-                      Pass 2
-                    </Button>
-                    <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
-                      <Copy className="w-4 h-4" />
-                      Copy
-                    </Button>
-                    <Button variant="outline" className="gap-2" onClick={handleAssemblyDownload} disabled={!assemblyCode}>
-                      <Download className="w-4 h-4" />
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </Panel>
-
-            <PanelResizeHandle className="h-2 bg-border hover:bg-primary/20 transition-colors rounded-sm" />
-
-            <Panel defaultSize={30} minSize={20}>
-              <Card className="p-6 bg-card border-code-border h-full">
-                <div className="space-y-2 h-full flex flex-col">
-                  <h4 className="text-xs font-medium text-muted-foreground">Event Log</h4>
-                  <Textarea
-                    value={eventLog}
-                    readOnly
-                    placeholder="Events will be logged here..."
-                    className="font-mono text-xs flex-1 bg-code-bg border-code-border resize-none"
-                  />
-                </div>
-              </Card>
-            </Panel>
-          </PanelGroup>
+          <Card className="p-6 bg-card border-code-border">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-primary">Assembly Tools</h3>
+              <div className="flex gap-3">
+                <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()} onClick={handlePass1}>
+                  Pass 1
+                </Button>
+                <Button variant="outline" className="gap-2">
+                  Pass 2
+                </Button>
+                <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </Button>
+                <Button variant="outline" className="gap-2" onClick={handleAssemblyDownload} disabled={!assemblyCode}>
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-medium text-muted-foreground">Event Log</h4>
+                <Textarea
+                  value={eventLog}
+                  readOnly
+                  placeholder="Events will be logged here..."
+                  className="font-mono text-xs h-24 bg-code-bg border-code-border resize-none"
+                />
+              </div>
+            </div>
+          </Card>
         </TabsContent>
 
         <TabsContent value="disassemble" className="space-y-4 mt-6">
