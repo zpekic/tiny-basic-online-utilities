@@ -40,7 +40,7 @@ export const AssemblerTool = () => {
         });
         setBinaryData(newData);
       } catch (error) {
-        // Silent fail during typing
+        addLogEntry(`Assembly error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
   }, [assemblyCode, mode]);
@@ -62,7 +62,7 @@ export const AssemblerTool = () => {
           setAssemblyCode(disassembled);
         }
       } catch (error) {
-        // Silent fail
+        addLogEntry(`Disassembly error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
   }, [binaryData, mode]);
@@ -73,6 +73,7 @@ export const AssemblerTool = () => {
 
     const maxSize = 64 * 1024; // 64KB
     if (file.size > maxSize) {
+      addLogEntry(`Error: File ${file.name} exceeds 64KB limit (${file.size} bytes)`);
       toast.error("File size exceeds 64KB limit");
       e.target.value = ""; // Reset input
       return;
@@ -87,6 +88,7 @@ export const AssemblerTool = () => {
       toast.success(`Loaded ${file.name}`);
     };
     reader.onerror = () => {
+      addLogEntry(`Error: Failed to read file ${file.name}`);
       toast.error("Failed to read file");
     };
     reader.readAsText(file);
@@ -101,6 +103,7 @@ export const AssemblerTool = () => {
 
     const maxSize = 64 * 1024; // 64KB
     if (file.size > maxSize) {
+      addLogEntry(`Error: File ${file.name} exceeds 64KB limit (${file.size} bytes)`);
       toast.error("File size exceeds 64KB limit");
       e.target.value = "";
       return;
@@ -149,6 +152,7 @@ export const AssemblerTool = () => {
           addLogEntry(`Uploaded Intel HEX file: ${file.name} (${file.size} bytes)`);
           toast.success(`Loaded ${file.name}`);
         } catch (error) {
+          addLogEntry(`Error: Failed to parse Intel HEX file ${file.name}`);
           toast.error("Failed to parse Intel HEX file");
         }
       };
@@ -156,6 +160,7 @@ export const AssemblerTool = () => {
     }
     
     reader.onerror = () => {
+      addLogEntry(`Error: Failed to read file ${file.name}`);
       toast.error("Failed to read file");
     };
     
