@@ -495,7 +495,7 @@ export const AssemblerTool = () => {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-primary">Assembly Tools</h3>
               <div className="flex gap-3">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()}>
                   Pass 1
                 </Button>
                 <Button variant="outline" className="gap-2">
