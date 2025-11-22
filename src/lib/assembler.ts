@@ -164,7 +164,7 @@ function processPass1Line(
       case 'SB': case 'RB': case 'FV': case 'SV': case 'GS': case 'RS':
       case 'GO': case 'NE': case 'AD': case 'SU': case 'MP': case 'DV':
       case 'CP': case 'NX': case 'LS': case 'PN': case 'PQ': case 'PT':
-      case 'NL': case 'GL': case 'IL': case 'XQ': case 'WS': case 'US': case 'RT':
+      case 'NL': case 'GL': case 'IL': case 'MT': case 'XQ': case 'WS': case 'US': case 'RT':
         return { newOrgValue: orgValue + 1, error: null };
       
       // Two-byte instructions
