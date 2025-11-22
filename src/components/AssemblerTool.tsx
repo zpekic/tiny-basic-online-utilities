@@ -20,6 +20,7 @@ export const AssemblerTool = () => {
   const [pass1Result, setPass1Result] = useState<Pass1Result | null>(null);
   const [errorLines, setErrorLines] = useState<number[]>([]);
   const [cursorPosition, setCursorPosition] = useState<number>(0);
+  const [pass1Run, setPass1Run] = useState<boolean>(false);
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   const addLogEntry = (message: string) => {
@@ -82,6 +83,9 @@ export const AssemblerTool = () => {
     } else {
       toast.error(`Pass 1 completed with ${result.errorCount} error(s)`);
     }
+    
+    // Set pass1_run to true at the end
+    setPass1Run(true);
   };
 
   // Auto-assemble when assembly code changes (commented out for now)
@@ -531,6 +535,7 @@ export const AssemblerTool = () => {
                     onChange={(e) => {
                       setAssemblyCode(e.target.value);
                       setCursorPosition(e.target.selectionStart);
+                      setPass1Run(false);
                     }}
                     onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
                     placeholder="Upload or enter TBIL assembly code here..."
