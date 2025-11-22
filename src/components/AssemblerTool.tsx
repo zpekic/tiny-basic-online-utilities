@@ -10,6 +10,7 @@ import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload, Download } from "l
 import { toast } from "sonner";
 import { assemble, disassemble } from "@/lib/assembler";
 import { useBinaryData } from "@/contexts/BinaryDataContext";
+import { validateCode } from "@/lib/validator";
 
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
@@ -25,6 +26,20 @@ export const AssemblerTool = () => {
   // Auto-assemble when assembly code changes
   useEffect(() => {
     if (mode === "assemble" && assemblyCode.trim()) {
+      // First validate the code
+      const validationErrors = validateCode(assemblyCode);
+      
+      if (validationErrors.length > 0) {
+        // Log all validation errors
+        validationErrors.forEach(error => {
+          addLogEntry(`Error on line ${error.line}: ${error.message}`);
+        });
+        
+        // Show toast for first error
+        toast.error(`Validation failed: ${validationErrors[0].message}`);
+        return;
+      }
+      
       try {
         const machineCode = assemble(assemblyCode);
         const newData = new Uint8Array(65536);
@@ -39,8 +54,11 @@ export const AssemblerTool = () => {
           }
         });
         setBinaryData(newData);
+        addLogEntry('Assembly completed successfully');
       } catch (error) {
-        addLogEntry(`Assembly error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        addLogEntry(`Assembly error: ${errorMsg}`);
+        toast.error(`Assembly failed: ${errorMsg}`);
       }
     }
   }, [assemblyCode, mode]);
