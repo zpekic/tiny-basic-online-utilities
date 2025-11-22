@@ -517,7 +517,7 @@ export const AssemblerTool = () => {
                   <LineNumberTextarea
                     value={assemblyCode}
                     onChange={(e) => setAssemblyCode(e.target.value)}
-                    placeholder="Enter assembly code here...&#10;&#10;Example:&#10;MOV R0, #5&#10;ADD R1, R0, #3"
+                    placeholder="Upload or enter TBIL assembly code here..."
                     className="font-mono text-sm bg-code-bg border-code-border"
                     errorLines={errorLines}
                   />
