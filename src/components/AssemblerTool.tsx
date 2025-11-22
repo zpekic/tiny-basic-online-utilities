@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
-import { assemble, disassemble } from "@/lib/assembler";
+import { pass1, type Pass1Result } from "@/lib/assembler";
 import { useBinaryData } from "@/contexts/BinaryDataContext";
 import { validateCode } from "@/lib/validator";
 
@@ -16,6 +16,7 @@ export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
   const [downloadFormat, setDownloadFormat] = useState<"hex" | "bin" | "vhdl">("hex");
   const [eventLog, setEventLog] = useState<string>("");
+  const [pass1Result, setPass1Result] = useState<Pass1Result | null>(null);
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   const addLogEntry = (message: string) => {
@@ -23,7 +24,54 @@ export const AssemblerTool = () => {
     setEventLog(prev => `${prev}[${timestamp}] ${message}\n`);
   };
 
-  // Auto-assemble when assembly code changes
+  const handlePass1 = () => {
+    // Clear event log
+    setEventLog('');
+    
+    // Set org_value to 0
+    setOrgValue(0);
+    
+    addLogEntry('Starting Pass 1...');
+    addLogEntry('org_value set to 0');
+    addLogEntry('pass1_errorcount set to 0');
+    
+    // Run Pass 1
+    const result = pass1(assemblyCode);
+    setPass1Result(result);
+    
+    // Display label dictionary
+    addLogEntry('--- Label Dictionary ---');
+    const labels = Object.entries(result.labelDictionary);
+    if (labels.length === 0) {
+      addLogEntry('(no labels found)');
+    } else {
+      labels.forEach(([label, entry]) => {
+        addLogEntry(`${label}: line=${entry.line_number}, org=${entry.org_value}`);
+      });
+    }
+    
+    // Display errors if any
+    if (result.errors.length > 0) {
+      addLogEntry('--- Errors ---');
+      result.errors.forEach(error => {
+        addLogEntry(error);
+      });
+    }
+    
+    // Display error count
+    addLogEntry(`--- Pass 1 Complete ---`);
+    addLogEntry(`pass1_errorcount: ${result.errorCount}`);
+    addLogEntry(`final org_value: ${result.finalOrgValue}`);
+    
+    if (result.errorCount === 0) {
+      toast.success('Pass 1 completed successfully');
+    } else {
+      toast.error(`Pass 1 completed with ${result.errorCount} error(s)`);
+    }
+  };
+
+  // Auto-assemble when assembly code changes (commented out for now)
+  /*
   useEffect(() => {
     if (mode === "assemble" && assemblyCode.trim()) {
       // First validate the code
@@ -62,8 +110,10 @@ export const AssemblerTool = () => {
       }
     }
   }, [assemblyCode, mode]);
+  */
 
-  // Auto-disassemble when binary data changes in disassemble mode
+  // Auto-disassemble when binary data changes in disassemble mode (disabled for now)
+  /*
   useEffect(() => {
     if (mode === "disassemble") {
       try {
@@ -84,6 +134,7 @@ export const AssemblerTool = () => {
       }
     }
   }, [binaryData, mode]);
+  */
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -495,7 +546,7 @@ export const AssemblerTool = () => {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-primary">Assembly Tools</h3>
               <div className="flex gap-3">
-                <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()}>
+                <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()} onClick={handlePass1}>
                   Pass 1
                 </Button>
                 <Button variant="outline" className="gap-2">
