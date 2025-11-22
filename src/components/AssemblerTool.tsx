@@ -14,7 +14,13 @@ import { useBinaryData } from "@/contexts/BinaryDataContext";
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
   const [downloadFormat, setDownloadFormat] = useState<"hex" | "bin" | "vhdl">("hex");
+  const [eventLog, setEventLog] = useState<string>("");
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
+
+  const addLogEntry = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setEventLog(prev => `${prev}[${timestamp}] ${message}\n`);
+  };
 
   // Auto-assemble when assembly code changes
   useEffect(() => {
@@ -77,6 +83,7 @@ export const AssemblerTool = () => {
       const content = event.target?.result as string;
       setAssemblyCode(content);
       setOrgValue(0);
+      addLogEntry(`Uploaded assembly file: ${file.name} (${file.size} bytes)`);
       toast.success(`Loaded ${file.name}`);
     };
     reader.onerror = () => {
@@ -109,6 +116,7 @@ export const AssemblerTool = () => {
         const newData = new Uint8Array(65536);
         newData.set(fileData.slice(0, Math.min(fileData.length, 65536)));
         setBinaryData(newData);
+        addLogEntry(`Uploaded binary file: ${file.name} (${file.size} bytes)`);
         toast.success(`Loaded ${file.name} (${fileData.length} bytes)`);
       };
       reader.readAsArrayBuffer(file);
@@ -138,6 +146,7 @@ export const AssemblerTool = () => {
             }
           }
           setBinaryData(newData);
+          addLogEntry(`Uploaded Intel HEX file: ${file.name} (${file.size} bytes)`);
           toast.success(`Loaded ${file.name}`);
         } catch (error) {
           toast.error("Failed to parse Intel HEX file");
@@ -476,6 +485,15 @@ export const AssemblerTool = () => {
                   <Download className="w-4 h-4" />
                   Download
                 </Button>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-medium text-muted-foreground">Event Log</h4>
+                <Textarea
+                  value={eventLog}
+                  readOnly
+                  placeholder="Events will be logged here..."
+                  className="font-mono text-xs h-24 bg-code-bg border-code-border resize-none"
+                />
               </div>
             </div>
           </Card>
