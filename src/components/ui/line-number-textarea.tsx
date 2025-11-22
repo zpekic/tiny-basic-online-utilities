@@ -2,12 +2,14 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface LineNumberTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  errorLines?: number[];
+}
 
 const LineNumberTextarea = React.forwardRef<
   HTMLTextAreaElement,
   LineNumberTextareaProps
->(({ className, value, onChange, ...props }, ref) => {
+>(({ className, value, onChange, errorLines = [], ...props }, ref) => {
   const [lineCount, setLineCount] = React.useState(1);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -39,7 +41,13 @@ const LineNumberTextarea = React.forwardRef<
         }}
       >
         {Array.from({ length: lineCount }, (_, i) => (
-          <div key={i + 1} className="leading-[1.5]">
+          <div 
+            key={i + 1} 
+            className={cn(
+              "leading-[1.5] px-2",
+              errorLines.includes(i + 1) && "bg-destructive/20 text-destructive font-semibold"
+            )}
+          >
             {i + 1}
           </div>
         ))}
