@@ -21,6 +21,7 @@ export const AssemblerTool = () => {
   const [errorLines, setErrorLines] = useState<number[]>([]);
   const [cursorPosition, setCursorPosition] = useState<number>(0);
   const [pass1Run, setPass1Run] = useState<boolean>(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
 
   const addLogEntry = (message: string) => {
@@ -210,6 +211,10 @@ export const AssemblerTool = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
+      
+      // Store the uploaded file name (without extension)
+      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+      setUploadedFileName(nameWithoutExt);
       
       if (assemblyCode.trim()) {
         // Insert at cursor position if there's existing content
@@ -412,7 +417,7 @@ export const AssemblerTool = () => {
     if (!assemblyCode) return;
     
     const blob = new Blob([assemblyCode], { type: 'text/plain' });
-    const filename = 'assembly_code.tba';
+    const filename = uploadedFileName ? `${uploadedFileName}.tba` : 'assembly_code.tba';
     
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -478,11 +483,11 @@ export const AssemblerTool = () => {
       hexLines.push(':00000001FF');
       
       blob = new Blob([hexLines.join('\n')], { type: 'text/plain' });
-      filename = 'machine_code.hex';
+      filename = uploadedFileName ? `${uploadedFileName}.hex` : 'machine_code.hex';
     } else if (downloadFormat === 'bin') {
       // Export raw binary data limited to download size
       blob = new Blob([binaryData.slice(0, downloadSize)], { type: 'application/octet-stream' });
-      filename = 'machine_code.bin';
+      filename = uploadedFileName ? `${uploadedFileName}.bin` : 'machine_code.bin';
     } else if (downloadFormat === 'vhdl') {
       // Generate VHDL ROM file
       const vhdlLines: string[] = [];
@@ -535,11 +540,11 @@ export const AssemblerTool = () => {
       vhdlLines.push('end Behavioral;');
       
       blob = new Blob([vhdlLines.join('\n')], { type: 'text/plain' });
-      filename = 'il_rom.vhd';
+      filename = uploadedFileName ? `${uploadedFileName}.vhd` : 'il_rom.vhd';
     } else {
       // Default: download assembly code
       blob = new Blob([assemblyCode], { type: 'text/plain' });
-      filename = 'assembly_code.asm';
+      filename = uploadedFileName ? `${uploadedFileName}.asm` : 'assembly_code.asm';
     }
     
     const url = URL.createObjectURL(blob);
