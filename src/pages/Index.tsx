@@ -15,7 +15,17 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Tiny Basic Online Utilities</h1>
-                <p className="text-xs text-muted-foreground">Companion to Basic CPU</p>
+                <p className="text-xs text-muted-foreground">
+                  Companion to{' '}
+                  <a 
+                    href="https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    'Celebrating 50 years of Tiny Basic'
+                  </a>
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
