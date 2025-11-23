@@ -37,34 +37,36 @@ function evaluateExpression(expr: string): number {
 
 // Helper function to process text strings
 function transformText(text: string): { transformed: string; length: number } {
-  let transformed = '';
+  let result: number[] = [];
   let i = 0;
   
   while (i < text.length) {
     if (text[i] === '^' && i + 1 < text.length) {
       if (text[i + 1] === '^') {
         // ^^ becomes single ^
-        transformed += '^';
+        result.push('^'.charCodeAt(0));
         i += 2;
       } else if (text[i + 1] >= 'A' && text[i + 1] <= 'Z') {
         // A^ to Z^ becomes ASCII code - 64
-        transformed += String.fromCharCode(text[i + 1].charCodeAt(0) - 64);
+        result.push(text[i + 1].charCodeAt(0) - 64);
         i += 2;
       } else {
-        transformed += text[i];
+        result.push(text[i].charCodeAt(0));
         i++;
       }
-    } else if (i === text.length - 1) {
-      // Last character - add 128 to ASCII code
-      transformed += String.fromCharCode(text[i].charCodeAt(0) + 128);
-      i++;
     } else {
-      transformed += text[i];
+      result.push(text[i].charCodeAt(0));
       i++;
     }
   }
   
-  return { transformed, length: transformed.length };
+  // Set bit 7 on the last byte (OR with 0x80)
+  if (result.length > 0) {
+    result[result.length - 1] |= 0x80;
+  }
+  
+  const transformed = String.fromCharCode(...result);
+  return { transformed, length: result.length };
 }
 
 // Remove comments from a line
