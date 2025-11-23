@@ -619,7 +619,7 @@ function processPass2Line(
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
         }
-        machineCode[orgValue] = 0xE0 + (0x1F & ((branchValue & 0xFF00) >> 8));
+        machineCode[orgValue] = 0xE0 + (0x1F & (branchValue & 0xFF));
         return { newOrgValue: orgValue + 1, error: null };
       }
       
