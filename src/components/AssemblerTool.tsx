@@ -61,7 +61,8 @@ export const AssemblerTool = () => {
       addLogEntry('(no labels found)');
     } else {
       labels.forEach(([label, entry]) => {
-        addLogEntry(`${label}: line=${entry.line_number}, org=${entry.org_value}`);
+        const hexValue = entry.org_value.toString(16).toUpperCase().padStart(4, '0');
+        addLogEntry(`${label}: line=${entry.line_number}, org=${entry.org_value} (0x${hexValue})`);
       });
     }
     
