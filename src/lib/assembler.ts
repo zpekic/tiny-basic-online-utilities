@@ -552,12 +552,8 @@ function processPass2Line(
             throw new Error(`Branch label not found: ${branchLabel}`);
           }
           const labelOrg = labelDictionary[branchLabel].org_value;
-          // Two cases based on whether label org >= current org
-          if (labelOrg >= orgValue) {
-            branchValue = labelOrg - orgValue + 32;
-          } else {
-            branchValue = labelOrg - orgValue + 31;
-          }
+          // Both cases use same formula: org value of label - current org value + 31
+          branchValue = labelOrg - orgValue + 31;
           if (branchValue > 63 || branchValue < 0) {
             throw new Error(`Relative branch value out of range (0-63): ${branchValue}`);
           }
