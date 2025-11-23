@@ -570,7 +570,7 @@ function processPass2Line(
           if (!labelDictionary[branchLabel]) {
             throw new Error(`Branch label not found: ${branchLabel}`);
           }
-          branchValue = labelDictionary[branchLabel].org_value - orgValue;
+          branchValue = labelDictionary[branchLabel].org_value - orgValue - 1;
           if (branchValue > 31) {
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
@@ -589,7 +589,7 @@ function processPass2Line(
           if (!labelDictionary[branchLabel]) {
             throw new Error(`Branch label not found: ${branchLabel}`);
           }
-          branchValue = labelDictionary[branchLabel].org_value - orgValue;
+          branchValue = labelDictionary[branchLabel].org_value - orgValue - 1;
           if (branchValue > 31) {
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
@@ -608,7 +608,7 @@ function processPass2Line(
           if (!labelDictionary[branchLabel]) {
             throw new Error(`Branch label not found: ${branchLabel}`);
           }
-          branchValue = labelDictionary[branchLabel].org_value - orgValue;
+          branchValue = labelDictionary[branchLabel].org_value - orgValue - 1;
           if (branchValue > 31) {
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
@@ -647,7 +647,7 @@ function processPass2Line(
           if (!labelDictionary[branchLabel]) {
             throw new Error(`Branch label not found: ${branchLabel}`);
           }
-          branchValue = labelDictionary[branchLabel].org_value - orgValue;
+          branchValue = labelDictionary[branchLabel].org_value - orgValue - 1;
           if (branchValue > 31) {
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
