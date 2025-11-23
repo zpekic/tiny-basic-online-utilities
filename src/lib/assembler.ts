@@ -41,8 +41,8 @@ function transformText(text: string): { transformed: string; length: number } {
   let i = 0;
   
   while (i < text.length) {
-    if (text[i] >= 'A' && text[i] <= 'Z' && i + 1 < text.length && text[i + 1] === '^') {
-      // Uppercase followed by ^ becomes ASCII code - 64
+    if (text[i] >= '@' && text[i] <= 'Z' && i + 1 < text.length && text[i + 1] === '^') {
+      // @ to Z followed by ^ becomes ASCII code - 64
       result.push(text[i].charCodeAt(0) - 64);
       i += 2;
     } else if (text[i] === '^' && i + 1 < text.length && text[i + 1] === '^') {
