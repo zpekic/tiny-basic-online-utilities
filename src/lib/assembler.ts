@@ -556,7 +556,7 @@ function processPass2Line(
           if (labelOrg >= orgValue) {
             branchValue = labelOrg - orgValue + 32;
           } else {
-            branchValue = orgValue - labelOrg;
+            branchValue = labelOrg - orgValue + 31;
           }
           if (branchValue > 63 || branchValue < 0) {
             throw new Error(`Relative branch value out of range (0-63): ${branchValue}`);
