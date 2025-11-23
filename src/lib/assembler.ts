@@ -551,8 +551,8 @@ function processPass2Line(
           if (!labelDictionary[branchLabel]) {
             throw new Error(`Branch label not found: ${branchLabel}`);
           }
-          branchValue = labelDictionary[branchLabel].org_value - orgValue + 32;
-          if (branchValue > 63) {
+          branchValue = orgValue - labelDictionary[branchLabel].org_value + 31;
+          if (branchValue > 63 || branchValue < 0) {
             throw new Error(`Relative branch value out of range (0-63): ${branchValue}`);
           }
         }
