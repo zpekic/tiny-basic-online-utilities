@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
-import { pass1, type Pass1Result } from "@/lib/assembler";
+import { pass1, pass2, type Pass1Result, type Pass2Result } from "@/lib/assembler";
 import { useBinaryData } from "@/contexts/BinaryDataContext";
 import { validateCode } from "@/lib/validator";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
@@ -86,6 +86,45 @@ export const AssemblerTool = () => {
     
     // Set pass1_run to true at the end
     setPass1Run(true);
+  };
+
+  const handlePass2 = () => {
+    if (!pass1Result) {
+      toast.error('Must run Pass 1 first');
+      return;
+    }
+    
+    // Set org_value to 0
+    setOrgValue(0);
+    
+    addLogEntry('Starting Pass 2...');
+    addLogEntry('org_value set to 0');
+    addLogEntry('pass2_errorcount set to 0');
+    
+    // Run Pass 2
+    const result = pass2(assemblyCode, pass1Result.labelDictionary);
+    
+    // Update binary data with machine code
+    setBinaryData(result.machineCode);
+    
+    // Display errors if any
+    if (result.errors.length > 0) {
+      addLogEntry('--- Errors ---');
+      result.errors.forEach(error => {
+        addLogEntry(error);
+      });
+    }
+    
+    // Display error count
+    addLogEntry(`--- Pass 2 Complete ---`);
+    addLogEntry(`pass2_errorcount: ${result.errorCount}`);
+    addLogEntry(`final org_value: ${result.finalOrgValue}`);
+    
+    if (result.errorCount === 0) {
+      toast.success('Pass 2 completed successfully');
+    } else {
+      toast.error(`Pass 2 completed with ${result.errorCount} error(s)`);
+    }
   };
 
   // Auto-assemble when assembly code changes (commented out for now)
@@ -590,7 +629,7 @@ export const AssemblerTool = () => {
                 <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()} onClick={handlePass1}>
                   Pass 1
                 </Button>
-                <Button variant="outline" className="gap-2" disabled={!pass1Run || (pass1Result?.errorCount ?? 1) > 0}>
+                <Button variant="outline" className="gap-2" disabled={!pass1Run || (pass1Result?.errorCount ?? 1) > 0} onClick={handlePass2}>
                   Pass 2
                 </Button>
                 <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
