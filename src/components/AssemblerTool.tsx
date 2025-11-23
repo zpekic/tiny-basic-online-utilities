@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LineNumberTextarea } from "@/components/ui/line-number-textarea";
@@ -6,12 +6,13 @@ import { HexEditor } from "@/components/ui/hex-editor";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, ArrowLeftRight, Trash2, Code2, Binary, Upload, Download } from "lucide-react";
+import { Copy, Code2, Binary, Upload, Download } from "lucide-react";
 import { toast } from "sonner";
-import { pass1, pass2, type Pass1Result, type Pass2Result } from "@/lib/assembler";
+import { type Pass1Result } from "@/lib/assembler";
 import { useBinaryData } from "@/contexts/BinaryDataContext";
-import { validateCode } from "@/lib/validator";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+import { AssemblePass1 } from "./AssemblePass1";
+import { AssemblePass2 } from "./AssemblePass2";
 
 export const AssemblerTool = () => {
   const [mode, setMode] = useState<"assemble" | "disassemble">("assemble");
@@ -29,105 +30,9 @@ export const AssemblerTool = () => {
     setEventLog(prev => `${prev}[${timestamp}] ${message}\n`);
   };
 
-  const handlePass1 = () => {
-    // Clear event log and error lines
+  const handleClearLog = () => {
     setEventLog('');
     setErrorLines([]);
-    
-    // Set org_value to 0
-    setOrgValue(0);
-    
-    addLogEntry('Starting Pass 1...');
-    addLogEntry('org_value set to 0');
-    addLogEntry('pass1_errorcount set to 0');
-    
-    // Run Pass 1
-    const result = pass1(assemblyCode);
-    setPass1Result(result);
-    
-    // Extract error line numbers from error messages
-    const errorLineNumbers: number[] = [];
-    result.errors.forEach(error => {
-      const match = error.match(/line (\d+)/);
-      if (match) {
-        errorLineNumbers.push(parseInt(match[1]));
-      }
-    });
-    setErrorLines(errorLineNumbers);
-    
-    // Display label dictionary
-    addLogEntry('--- Label Dictionary ---');
-    const labels = Object.entries(result.labelDictionary);
-    if (labels.length === 0) {
-      addLogEntry('(no labels found)');
-    } else {
-      labels.forEach(([label, entry]) => {
-        const hexValue = entry.org_value.toString(16).toUpperCase().padStart(4, '0');
-        addLogEntry(`${label}: line=${entry.line_number}, org=${entry.org_value} (0x${hexValue})`);
-      });
-    }
-    
-    // Display errors if any
-    if (result.errors.length > 0) {
-      addLogEntry('--- Errors ---');
-      result.errors.forEach(error => {
-        addLogEntry(error);
-      });
-    }
-    
-    // Display error count
-    addLogEntry(`--- Pass 1 Complete ---`);
-    addLogEntry(`pass1_errorcount: ${result.errorCount}`);
-    const hexOrgValue = result.finalOrgValue.toString(16).toUpperCase().padStart(4, '0');
-    addLogEntry(`final org_value: ${result.finalOrgValue} (0x${hexOrgValue})`);
-    
-    if (result.errorCount === 0) {
-      toast.success('Pass 1 completed successfully');
-    } else {
-      toast.error(`Pass 1 completed with ${result.errorCount} error(s)`);
-    }
-    
-    // Set pass1_run to true at the end
-    setPass1Run(true);
-  };
-
-  const handlePass2 = () => {
-    if (!pass1Result) {
-      toast.error('Must run Pass 1 first');
-      return;
-    }
-    
-    // Set org_value to 0
-    setOrgValue(0);
-    
-    addLogEntry('Starting Pass 2...');
-    addLogEntry('org_value set to 0');
-    addLogEntry('pass2_errorcount set to 0');
-    
-    // Run Pass 2
-    const result = pass2(assemblyCode, pass1Result.labelDictionary);
-    
-    // Update binary data with machine code
-    setBinaryData(result.machineCode);
-    
-    // Display errors if any
-    if (result.errors.length > 0) {
-      addLogEntry('--- Errors ---');
-      result.errors.forEach(error => {
-        addLogEntry(error);
-      });
-    }
-    
-    // Display error count
-    addLogEntry(`--- Pass 2 Complete ---`);
-    addLogEntry(`pass2_errorcount: ${result.errorCount}`);
-    addLogEntry(`final org_value: ${result.finalOrgValue}`);
-    
-    if (result.errorCount === 0) {
-      toast.success('Pass 2 completed successfully');
-    } else {
-      toast.error(`Pass 2 completed with ${result.errorCount} error(s)`);
-    }
   };
 
   // Auto-assemble when assembly code changes (commented out for now)
@@ -655,12 +560,23 @@ export const AssemblerTool = () => {
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-primary">Assembly Tools</h3>
               <div className="flex gap-3">
-                <Button variant="outline" className="gap-2" disabled={!assemblyCode.trim()} onClick={handlePass1}>
-                  Pass 1
-                </Button>
-                <Button variant="outline" className="gap-2" disabled={!pass1Run || (pass1Result?.errorCount ?? 1) > 0} onClick={handlePass2}>
-                  Pass 2
-                </Button>
+                <AssemblePass1
+                  assemblyCode={assemblyCode}
+                  onPass1Complete={(result) => {
+                    setPass1Result(result);
+                    setPass1Run(true);
+                  }}
+                  onLogEntry={addLogEntry}
+                  onErrorLinesChange={setErrorLines}
+                  onOrgValueChange={setOrgValue}
+                />
+                <AssemblePass2
+                  assemblyCode={assemblyCode}
+                  pass1Result={pass1Result}
+                  onBinaryDataChange={setBinaryData}
+                  onLogEntry={addLogEntry}
+                  onOrgValueChange={setOrgValue}
+                />
                 <Button variant="outline" className="gap-2" onClick={handleCopy} disabled={!assemblyCode}>
                   <Copy className="w-4 h-4" />
                   Copy
