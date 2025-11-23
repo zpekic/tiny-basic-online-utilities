@@ -600,70 +600,76 @@ export const AssemblerTool = () => {
         </TabsContent>
 
         <TabsContent value="disassemble" className="space-y-4 mt-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card className="p-6 bg-card border-code-border">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-accent">Machine Code</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="h-8 text-xs gap-2"
-                  >
-                    <label htmlFor="file-upload-binary-disassemble" className="cursor-pointer">
-                      <Upload className="w-3 h-3" />
-                      Upload Binary or Hex File
-                      <input
-                        id="file-upload-binary-disassemble"
-                        type="file"
-                        accept=".bin,.hex"
-                        onChange={handleBinaryFileUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </Button>
+          <PanelGroup direction="horizontal" className="gap-2">
+            <Panel defaultSize={50} minSize={30}>
+              <Card className="p-6 bg-card border-code-border h-full">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-accent">Machine Code</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="h-8 text-xs gap-2"
+                    >
+                      <label htmlFor="file-upload-binary-disassemble" className="cursor-pointer">
+                        <Upload className="w-3 h-3" />
+                        Upload Binary or Hex File
+                        <input
+                          id="file-upload-binary-disassemble"
+                          type="file"
+                          accept=".bin,.hex"
+                          onChange={handleBinaryFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </Button>
+                  </div>
+                  <HexEditor
+                    data={binaryData}
+                    onChange={setBinaryData}
+                    className="w-full"
+                  />
                 </div>
-                <HexEditor
-                  data={binaryData}
-                  onChange={setBinaryData}
-                  className="w-full"
-                />
-              </div>
-            </Card>
+              </Card>
+            </Panel>
 
-            <Card className="p-6 bg-card border-code-border">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-primary">Assembly Code</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    asChild
-                    className="h-8 text-xs gap-2"
-                  >
-                    <label htmlFor="file-upload-assemble-disassemble" className="cursor-pointer">
-                      <Upload className="w-3 h-3" />
-                      Upload Source File
-                      <input
-                        id="file-upload-assemble-disassemble"
-                        type="file"
-                        accept=".tba"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </Button>
+            <PanelResizeHandle className="w-2 bg-border hover:bg-primary/20 transition-colors rounded-sm" />
+
+            <Panel defaultSize={50} minSize={30}>
+              <Card className="p-6 bg-card border-code-border h-full">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-primary">Assembly Code</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                      className="h-8 text-xs gap-2"
+                    >
+                      <label htmlFor="file-upload-assemble-disassemble" className="cursor-pointer">
+                        <Upload className="w-3 h-3" />
+                        Upload Source File
+                        <input
+                          id="file-upload-assemble-disassemble"
+                          type="file"
+                          accept=".tba"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </Button>
+                  </div>
+                  <LineNumberTextarea
+                    value={assemblyCode}
+                    onChange={(e) => setAssemblyCode(e.target.value)}
+                    placeholder="Enter assembly code here..."
+                    className="font-mono text-sm bg-code-bg border-code-border"
+                  />
                 </div>
-                <LineNumberTextarea
-                  value={assemblyCode}
-                  onChange={(e) => setAssemblyCode(e.target.value)}
-                  placeholder="Enter assembly code here..."
-                  className="font-mono text-sm bg-code-bg border-code-border"
-                />
-              </div>
-            </Card>
-          </div>
+              </Card>
+            </Panel>
+          </PanelGroup>
 
           <Card className="p-6 bg-card border-code-border">
             <div className="space-y-3">
