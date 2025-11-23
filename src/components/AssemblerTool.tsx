@@ -77,7 +77,8 @@ export const AssemblerTool = () => {
     // Display error count
     addLogEntry(`--- Pass 1 Complete ---`);
     addLogEntry(`pass1_errorcount: ${result.errorCount}`);
-    addLogEntry(`final org_value: ${result.finalOrgValue}`);
+    const hexOrgValue = result.finalOrgValue.toString(16).toUpperCase().padStart(4, '0');
+    addLogEntry(`final org_value: ${result.finalOrgValue} (0x${hexOrgValue})`);
     
     if (result.errorCount === 0) {
       toast.success('Pass 1 completed successfully');
