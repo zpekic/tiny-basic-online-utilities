@@ -315,17 +315,25 @@ export const AssemblerTool = () => {
   const handleDisassemblyCopy = async () => {
     let content = '';
     
+    // Calculate smallest power of 2 greater than final org_value
+    const finalOrg = pass1Result?.finalOrgValue ?? 0;
+    let downloadSize = 1;
+    while (downloadSize <= finalOrg && downloadSize < 65536) {
+      downloadSize *= 2;
+    }
+    downloadSize = Math.min(downloadSize, 65536);
+    
     if (downloadFormat === 'hex') {
       // Generate Intel HEX format
       const hexLines: string[] = [];
       const bytesPerLine = 16;
       
-      for (let i = 0; i < 65536; i += bytesPerLine) {
+      for (let i = 0; i < downloadSize; i += bytesPerLine) {
         const lineData = binaryData.slice(i, i + bytesPerLine);
         const hasData = lineData.some(byte => byte !== 0);
         
         if (hasData) {
-          const byteCount = Math.min(bytesPerLine, 65536 - i);
+          const byteCount = Math.min(bytesPerLine, downloadSize - i);
           const address = i;
           const recordType = 0x00;
           const dataBytes = Array.from(binaryData.slice(i, i + byteCount));
@@ -358,18 +366,21 @@ export const AssemblerTool = () => {
       vhdlLines.push('use IEEE.NUMERIC_STD.ALL;');
       vhdlLines.push('');
       vhdlLines.push('entity il_rom is');
-      vhdlLines.push('    Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);');
+      
+      // Calculate VHDL bit width based on download size
+      const addrBits = Math.ceil(Math.log2(downloadSize));
+      vhdlLines.push(`    Port ( a : in  STD_LOGIC_VECTOR (${addrBits - 1} downto 0);`);
       vhdlLines.push('           d : out  STD_LOGIC_VECTOR (7 downto 0);');
       vhdlLines.push('           a_valid: out STD_LOGIC);');
       vhdlLines.push('end il_rom;');
       vhdlLines.push('');
       vhdlLines.push('architecture Behavioral of il_rom is');
       vhdlLines.push('');
-      vhdlLines.push('type rom_array is array (0 to 511) of STD_LOGIC_VECTOR(7 downto 0);');
+      vhdlLines.push(`type rom_array is array (0 to ${downloadSize - 1}) of STD_LOGIC_VECTOR(7 downto 0);`);
       vhdlLines.push('constant il_rom: rom_array := (');
       
       const romLines: string[] = [];
-      for (let i = 0; i < 512; i++) {
+      for (let i = 0; i < downloadSize; i++) {
         const value = binaryData[i];
         romLines.push('X"' + value.toString(16).toUpperCase().padStart(2, '0') + '"');
       }
@@ -383,8 +394,8 @@ export const AssemblerTool = () => {
       vhdlLines.push('');
       vhdlLines.push('begin');
       vhdlLines.push('');
-      vhdlLines.push('\td <= il_rom(to_integer(unsigned(a(8 downto 0))));');
-      vhdlLines.push('\ta_valid <= \'1\' when (unsigned(a) < 512) else \'0\';');
+      vhdlLines.push(`\td <= il_rom(to_integer(unsigned(a(${addrBits - 1} downto 0))));`);
+      vhdlLines.push(`\ta_valid <= '1' when (unsigned(a) < ${downloadSize}) else '0';`);
       vhdlLines.push('');
       vhdlLines.push('end Behavioral;');
       
@@ -417,6 +428,14 @@ export const AssemblerTool = () => {
   const handleDownload = () => {
     if (!assemblyCode && downloadFormat !== 'hex' && downloadFormat !== 'bin' && downloadFormat !== 'vhdl') return;
     
+    // Calculate smallest power of 2 greater than final org_value
+    const finalOrg = pass1Result?.finalOrgValue ?? 0;
+    let downloadSize = 1;
+    while (downloadSize <= finalOrg && downloadSize < 65536) {
+      downloadSize *= 2;
+    }
+    downloadSize = Math.min(downloadSize, 65536);
+    
     let blob: Blob;
     let filename: string;
     
@@ -425,13 +444,13 @@ export const AssemblerTool = () => {
       const hexLines: string[] = [];
       const bytesPerLine = 16;
       
-      for (let i = 0; i < 65536; i += bytesPerLine) {
+      for (let i = 0; i < downloadSize; i += bytesPerLine) {
         // Skip lines with all zeros
         const lineData = binaryData.slice(i, i + bytesPerLine);
         const hasData = lineData.some(byte => byte !== 0);
         
         if (hasData) {
-          const byteCount = Math.min(bytesPerLine, 65536 - i);
+          const byteCount = Math.min(bytesPerLine, downloadSize - i);
           const address = i;
           const recordType = 0x00; // Data record
           
@@ -461,8 +480,8 @@ export const AssemblerTool = () => {
       blob = new Blob([hexLines.join('\n')], { type: 'text/plain' });
       filename = 'machine_code.hex';
     } else if (downloadFormat === 'bin') {
-      // Export raw binary data
-      blob = new Blob([new Uint8Array(binaryData)], { type: 'application/octet-stream' });
+      // Export raw binary data limited to download size
+      blob = new Blob([binaryData.slice(0, downloadSize)], { type: 'application/octet-stream' });
       filename = 'machine_code.bin';
     } else if (downloadFormat === 'vhdl') {
       // Generate VHDL ROM file
@@ -478,19 +497,22 @@ export const AssemblerTool = () => {
       vhdlLines.push('use IEEE.NUMERIC_STD.ALL;');
       vhdlLines.push('');
       vhdlLines.push('entity il_rom is');
-      vhdlLines.push('    Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);');
+      
+      // Calculate VHDL bit width based on download size
+      const addrBits = Math.ceil(Math.log2(downloadSize));
+      vhdlLines.push(`    Port ( a : in  STD_LOGIC_VECTOR (${addrBits - 1} downto 0);`);
       vhdlLines.push('           d : out  STD_LOGIC_VECTOR (7 downto 0);');
       vhdlLines.push('           a_valid: out STD_LOGIC);');
       vhdlLines.push('end il_rom;');
       vhdlLines.push('');
       vhdlLines.push('architecture Behavioral of il_rom is');
       vhdlLines.push('');
-      vhdlLines.push('type rom_array is array (0 to 511) of STD_LOGIC_VECTOR(7 downto 0);');
+      vhdlLines.push(`type rom_array is array (0 to ${downloadSize - 1}) of STD_LOGIC_VECTOR(7 downto 0);`);
       vhdlLines.push('constant il_rom: rom_array := (');
       
       // Generate ROM data - 15 values per line
       const romLines: string[] = [];
-      for (let i = 0; i < 512; i++) {
+      for (let i = 0; i < downloadSize; i++) {
         const value = binaryData[i];
         const hexValue = 'X"' + value.toString(16).toUpperCase().padStart(2, '0') + '"';
         romLines.push(hexValue);
@@ -507,8 +529,8 @@ export const AssemblerTool = () => {
       vhdlLines.push('');
       vhdlLines.push('begin');
       vhdlLines.push('');
-      vhdlLines.push('\td <= il_rom(to_integer(unsigned(a(8 downto 0))));');
-      vhdlLines.push('\ta_valid <= \'1\' when (unsigned(a) < 512) else \'0\';');
+      vhdlLines.push(`\td <= il_rom(to_integer(unsigned(a(${addrBits - 1} downto 0))));`);
+      vhdlLines.push(`\ta_valid <= '1' when (unsigned(a) < ${downloadSize}) else '0';`);
       vhdlLines.push('');
       vhdlLines.push('end Behavioral;');
       
