@@ -562,7 +562,7 @@ function processPass2Line(
             throw new Error(`Relative branch value out of range (0-63): ${branchValue}`);
           }
         }
-        machineCode[orgValue] = 0x40 + (0x3F & branchValue);
+        machineCode[orgValue] = 0x40 + (0x3F & (branchValue & 0xFF));
         return { newOrgValue: orgValue + 1, error: null };
       }
       
@@ -581,7 +581,7 @@ function processPass2Line(
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
         }
-        machineCode[orgValue] = 0xA0 + (0x1F & branchValue);
+        machineCode[orgValue] = 0xA0 + (0x1F & (branchValue & 0xFF));
         return { newOrgValue: orgValue + 1, error: null };
       }
       
@@ -600,7 +600,7 @@ function processPass2Line(
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
         }
-        machineCode[orgValue] = 0xC0 + (0x1F & branchValue);
+        machineCode[orgValue] = 0xC0 + (0x1F & (branchValue & 0xFF));
         return { newOrgValue: orgValue + 1, error: null };
       }
       
@@ -619,7 +619,7 @@ function processPass2Line(
             throw new Error(`Forward branch value out of range (0-31): ${branchValue}`);
           }
         }
-        machineCode[orgValue] = 0xE0 + (0x1F & branchValue);
+        machineCode[orgValue] = 0xE0 + (0x1F & ((branchValue & 0xFF00) >> 8));
         return { newOrgValue: orgValue + 1, error: null };
       }
       
@@ -661,7 +661,7 @@ function processPass2Line(
         
         const { transformed } = transformText(textMatch[3]);
         
-        machineCode[orgValue] = 0x80 + (0x1F & branchValue);
+        machineCode[orgValue] = 0x80 + (0x1F & (branchValue & 0xFF));
         let currentOrg = orgValue + 1;
         for (let i = 0; i < transformed.length; i++) {
           machineCode[currentOrg] = transformed.charCodeAt(i);
