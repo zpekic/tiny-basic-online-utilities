@@ -575,7 +575,7 @@ end Behavioral;`;
                   value={eventLog}
                   readOnly
                   placeholder="Events will be logged here..."
-                  className="font-mono text-xs h-24 bg-code-bg border-code-border resize-none"
+                  className="font-mono text-xs h-40 bg-code-bg border-code-border resize-none"
                 />
               </div>
             </div>
