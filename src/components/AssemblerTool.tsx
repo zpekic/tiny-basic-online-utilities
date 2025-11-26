@@ -200,70 +200,76 @@ export const AssemblerTool = () => {
       content = hexLines.join('\n');
     } else if (downloadFormat === 'vhdl') {
       // Generate VHDL format using template
-      const addrDepth = Math.ceil(Math.log2(downloadSize));
+      const fileName = uploadedFileName || 'il';
       
-      const vhdlLines: string[] = [];
-      vhdlLines.push('----------------------------------------------------------------------------------');
-      vhdlLines.push('-- Company: https://hackaday.io/projects/hacker/233652');
-      vhdlLines.push('-- Engineer: zpekic@hotmail.com');
-      vhdlLines.push('--');
-      vhdlLines.push('-- Create Date: ' + new Date().toLocaleString());
-      vhdlLines.push('-- Design Name:');
-      vhdlLines.push('-- Module Name: MicroBasic - Behavioral');
-      vhdlLines.push('-- Project Name:');
-      vhdlLines.push('-- Target Devices:');
-      vhdlLines.push('-- Tool versions: ISE 14.7, mcc - microcode compiler');
-      vhdlLines.push('-- Description: https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic');
-      vhdlLines.push('--');
-      vhdlLines.push('----------------------------------------------------------------------------------');
-      vhdlLines.push('');
-      vhdlLines.push('library IEEE;');
-      vhdlLines.push('use IEEE.STD_LOGIC_1164.ALL;');
-      vhdlLines.push('');
-      vhdlLines.push('-- Uncomment the following library declaration if using');
-      vhdlLines.push('-- arithmetic functions with Signed or Unsigned values');
-      vhdlLines.push('use IEEE.NUMERIC_STD.ALL;');
-      vhdlLines.push('');
-      vhdlLines.push('-- Uncomment the following library declaration if instantiating');
-      vhdlLines.push('-- any Xilinx primitives in this code.');
-      vhdlLines.push('--library UNISIM;');
-      vhdlLines.push('--use UNISIM.VComponents.all;');
-      vhdlLines.push('');
-      vhdlLines.push('entity il_rom is');
-      vhdlLines.push('    Generic (');
-      vhdlLines.push('        ADDR_DEPTH : positive);');
-      vhdlLines.push('    Port (');
-      vhdlLines.push('        a : in  STD_LOGIC_VECTOR (10 downto 0);');
-      vhdlLines.push('        d : out  STD_LOGIC_VECTOR (7 downto 0));');
-      vhdlLines.push('end il_rom;');
-      vhdlLines.push('');
-      vhdlLines.push('architecture Behavioral of il_rom is');
-      vhdlLines.push('');
-      vhdlLines.push('type rom_type is array (0 to (2**ADDR_DEPTH - 1)) of std_logic_vector(7 downto 0);');
-      vhdlLines.push('');
-      vhdlLines.push('-- Original from: http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.asm');
-      vhdlLines.push('-- Create your own at: https://tiny-basic-online-utilities.lovable.app/');
-      vhdlLines.push('constant il_rom: rom_type := (');
-      
+      // Generate ROM data - 16 values per line
       const romLines: string[] = [];
       for (let i = 0; i < downloadSize; i++) {
         romLines.push('X"' + binaryData[i].toString(16).toUpperCase().padStart(2, '0') + '"');
       }
       
+      // Format with 16 values per line
+      const hexBytesLines: string[] = [];
       for (let i = 0; i < romLines.length; i += 16) {
         const chunk = romLines.slice(i, i + 16);
-        vhdlLines.push('\t' + chunk.join(', ') + (i + 16 < romLines.length ? ',' : ''));
+        const line = '\t' + chunk.join(', ') + (i + 16 < romLines.length ? ',' : '');
+        hexBytesLines.push(line);
       }
       
-      vhdlLines.push(');');
-      vhdlLines.push('');
-      vhdlLines.push('begin');
-      vhdlLines.push('');
-      vhdlLines.push('\td <= il_rom(to_integer(unsigned(a((ADDR_DEPTH - 1) downto 0))));');
-      vhdlLines.push('');
-      vhdlLines.push('end Behavioral;');
-      
-      content = vhdlLines.join('\n');
+      // Use template and replace placeholders
+      const template = `----------------------------------------------------------------------------------
+-- Company: https://hackaday.io/projects/hacker/233652
+-- Engineer: zpekic@hotmail.com
+--
+-- Create Date: ${new Date().toLocaleString()}
+-- Design Name:
+-- Module Name: MicroBasic - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions: ISE 14.7, mcc - microcode compiler
+-- Description: https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic
+--
+----------------------------------------------------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity FILENAME_rom is
+    Generic (
+        ADDR_DEPTH : positive);
+    Port (
+        a : in  STD_LOGIC_VECTOR (10 downto 0);
+        d : out  STD_LOGIC_VECTOR (7 downto 0));
+end FILENAME_rom;
+
+architecture Behavioral of FILENAME_rom is
+
+type rom_type is array (0 to (2**ADDR_DEPTH - 1)) of std_logic_vector(7 downto 0);
+
+-- Original from: http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.asm
+-- Create your own at: https://tiny-basic-online-utilities.lovable.app/
+constant FILENAME_rom: rom_type := (
+HEXBYTES
+);
+
+begin
+
+	d <= FILENAME_rom(to_integer(unsigned(a((ADDR_DEPTH - 1) downto 0))));
+
+end Behavioral;`;
+
+      content = template
+        .replace(/FILENAME/g, fileName)
+        .replace('HEXBYTES', hexBytesLines.join('\n'));
     }
     
     if (content) {
@@ -349,55 +355,9 @@ export const AssemblerTool = () => {
       filename = uploadedFileName ? `${uploadedFileName}.bin` : 'machine_code.bin';
     } else if (downloadFormat === 'vhdl') {
       // Generate VHDL ROM file using template
-      const vhdlLines: string[] = [];
+      const fileName = uploadedFileName || 'il';
       
-      // Calculate VHDL address depth based on download size
-      const addrDepth = Math.ceil(Math.log2(downloadSize));
-      
-      // Header
-      vhdlLines.push('----------------------------------------------------------------------------------');
-      vhdlLines.push('-- Company: https://hackaday.io/projects/hacker/233652');
-      vhdlLines.push('-- Engineer: zpekic@hotmail.com');
-      vhdlLines.push('--');
-      vhdlLines.push('-- Create Date: ' + new Date().toLocaleString());
-      vhdlLines.push('-- Design Name:');
-      vhdlLines.push('-- Module Name: MicroBasic - Behavioral');
-      vhdlLines.push('-- Project Name:');
-      vhdlLines.push('-- Target Devices:');
-      vhdlLines.push('-- Tool versions: ISE 14.7, mcc - microcode compiler');
-      vhdlLines.push('-- Description: https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic');
-      vhdlLines.push('--');
-      vhdlLines.push('----------------------------------------------------------------------------------');
-      vhdlLines.push('');
-      vhdlLines.push('library IEEE;');
-      vhdlLines.push('use IEEE.STD_LOGIC_1164.ALL;');
-      vhdlLines.push('');
-      vhdlLines.push('-- Uncomment the following library declaration if using');
-      vhdlLines.push('-- arithmetic functions with Signed or Unsigned values');
-      vhdlLines.push('use IEEE.NUMERIC_STD.ALL;');
-      vhdlLines.push('');
-      vhdlLines.push('-- Uncomment the following library declaration if instantiating');
-      vhdlLines.push('-- any Xilinx primitives in this code.');
-      vhdlLines.push('--library UNISIM;');
-      vhdlLines.push('--use UNISIM.VComponents.all;');
-      vhdlLines.push('');
-      vhdlLines.push('entity il_rom is');
-      vhdlLines.push('    Generic (');
-      vhdlLines.push('        ADDR_DEPTH : positive);');
-      vhdlLines.push('    Port (');
-      vhdlLines.push('        a : in  STD_LOGIC_VECTOR (10 downto 0);');
-      vhdlLines.push('        d : out  STD_LOGIC_VECTOR (7 downto 0));');
-      vhdlLines.push('end il_rom;');
-      vhdlLines.push('');
-      vhdlLines.push('architecture Behavioral of il_rom is');
-      vhdlLines.push('');
-      vhdlLines.push('type rom_type is array (0 to (2**ADDR_DEPTH - 1)) of std_logic_vector(7 downto 0);');
-      vhdlLines.push('');
-      vhdlLines.push('-- Original from: http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.asm');
-      vhdlLines.push('-- Create your own at: https://tiny-basic-online-utilities.lovable.app/');
-      vhdlLines.push('constant il_rom: rom_type := (');
-      
-      // Generate ROM data - 16 values per line to match template format
+      // Generate ROM data - 16 values per line
       const romLines: string[] = [];
       for (let i = 0; i < downloadSize; i++) {
         const value = binaryData[i];
@@ -405,21 +365,69 @@ export const AssemblerTool = () => {
       }
       
       // Format with 16 values per line
+      const hexBytesLines: string[] = [];
       for (let i = 0; i < romLines.length; i += 16) {
         const chunk = romLines.slice(i, i + 16);
         const line = '\t' + chunk.join(', ') + (i + 16 < romLines.length ? ',' : '');
-        vhdlLines.push(line);
+        hexBytesLines.push(line);
       }
       
-      vhdlLines.push(');');
-      vhdlLines.push('');
-      vhdlLines.push('begin');
-      vhdlLines.push('');
-      vhdlLines.push('\td <= il_rom(to_integer(unsigned(a((ADDR_DEPTH - 1) downto 0))));');
-      vhdlLines.push('');
-      vhdlLines.push('end Behavioral;');
+      // Use template and replace placeholders
+      const template = `----------------------------------------------------------------------------------
+-- Company: https://hackaday.io/projects/hacker/233652
+-- Engineer: zpekic@hotmail.com
+--
+-- Create Date: ${new Date().toLocaleString()}
+-- Design Name:
+-- Module Name: MicroBasic - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions: ISE 14.7, mcc - microcode compiler
+-- Description: https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic
+--
+----------------------------------------------------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity FILENAME_rom is
+    Generic (
+        ADDR_DEPTH : positive);
+    Port (
+        a : in  STD_LOGIC_VECTOR (10 downto 0);
+        d : out  STD_LOGIC_VECTOR (7 downto 0));
+end FILENAME_rom;
+
+architecture Behavioral of FILENAME_rom is
+
+type rom_type is array (0 to (2**ADDR_DEPTH - 1)) of std_logic_vector(7 downto 0);
+
+-- Original from: http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.asm
+-- Create your own at: https://tiny-basic-online-utilities.lovable.app/
+constant FILENAME_rom: rom_type := (
+HEXBYTES
+);
+
+begin
+
+	d <= FILENAME_rom(to_integer(unsigned(a((ADDR_DEPTH - 1) downto 0))));
+
+end Behavioral;`;
+
+      const vhdlContent = template
+        .replace(/FILENAME/g, fileName)
+        .replace('HEXBYTES', hexBytesLines.join('\n'));
       
-      blob = new Blob([vhdlLines.join('\n')], { type: 'text/plain' });
+      blob = new Blob([vhdlContent], { type: 'text/plain' });
       filename = uploadedFileName ? `${uploadedFileName}.vhd` : 'il_rom.vhd';
     } else {
       // Default: download assembly code
