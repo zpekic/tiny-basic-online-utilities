@@ -157,7 +157,7 @@ function processPass1Line(
         }
         return { newOrgValue: orgValue + 1, error: null };
         
-      case 'NO': case 'DS': case 'SP': case 'DT': case 'RD': case 'RE':
+      case 'NO': case 'DS': case 'SP':
       case 'SB': case 'RB': case 'FV': case 'SV': case 'GS': case 'RS':
       case 'GO': case 'NE': case 'AD': case 'SU': case 'MP': case 'DV':
       case 'CP': case 'NX': case 'LS': case 'PN': case 'PQ': case 'PT':
@@ -364,18 +364,6 @@ function processPass2Line(
         
       case 'SP':
         machineCode[orgValue] = 0x0C;
-        return { newOrgValue: orgValue + 1, error: null };
-        
-      case 'DT':
-        machineCode[orgValue] = 0x0D;
-        return { newOrgValue: orgValue + 1, error: null };
-        
-      case 'RD':
-        machineCode[orgValue] = 0x0E;
-        return { newOrgValue: orgValue + 1, error: null };
-        
-      case 'RE':
-        machineCode[orgValue] = 0x0F;
         return { newOrgValue: orgValue + 1, error: null };
         
       case 'SB':
