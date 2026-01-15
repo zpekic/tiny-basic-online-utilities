@@ -210,6 +210,15 @@ function processPass1Line(
         return { newOrgValue: orgValue + 1 + length, error: null };
       }
       
+      // CS instruction with text
+      case 'CS': {
+        if (parts.length < 2) throw new Error('CS requires a text string');
+        const textMatch = lineString.match(/CS\s+(['"])(.*?)\1/i);
+        if (!textMatch) throw new Error('CS requires quoted text');
+        const { length } = transformText(textMatch[2]);
+        return { newOrgValue: orgValue + 1 + length, error: null };
+      }
+      
       default:
         return { newOrgValue: orgValue, error: `Unknown instruction or directive: ${instruction}` };
     }
@@ -646,6 +655,22 @@ function processPass2Line(
         const { transformed } = transformText(textMatch[3]);
         
         machineCode[orgValue] = 0x80 + (0x1F & (branchValue & 0xFF));
+        let currentOrg = orgValue + 1;
+        for (let i = 0; i < transformed.length; i++) {
+          machineCode[currentOrg] = transformed.charCodeAt(i);
+          currentOrg++;
+        }
+        return { newOrgValue: currentOrg, error: null };
+      }
+      
+      // CS instruction with text
+      case 'CS': {
+        if (parts.length < 2) throw new Error('CS requires a text string');
+        const textMatch = lineString.match(/CS\s+(['"])(.*?)\1/i);
+        if (!textMatch) throw new Error('CS requires quoted text');
+        const { transformed } = transformText(textMatch[2]);
+        
+        machineCode[orgValue] = 0x1E;
         let currentOrg = orgValue + 1;
         for (let i = 0; i < transformed.length; i++) {
           machineCode[currentOrg] = transformed.charCodeAt(i);
