@@ -83,6 +83,7 @@ The assembler recognizes the following instructions:
 | `DV` | 1 | 0x1B |
 | `CP` | 1 | 0x1C |
 | `NX` | 1 | 0x1D |
+| `NC` | 1 | 0x1E |
 | `LS` | 1 | 0x1F |
 | `PN` | 1 | 0x20 |
 | `PQ` | 1 | 0x21 |
