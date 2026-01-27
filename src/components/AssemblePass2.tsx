@@ -6,6 +6,7 @@ interface AssemblePass2Props {
   assemblyCode: string;
   pass1Result: Pass1Result | null;
   onBinaryDataChange: (data: Uint8Array) => void;
+  onByteToLineMapChange: (map: Map<number, number>) => void;
   onLogEntry: (message: string) => void;
   onOrgValueChange: (value: number) => void;
   disabled?: boolean;
@@ -15,6 +16,7 @@ export const AssemblePass2 = ({
   assemblyCode,
   pass1Result,
   onBinaryDataChange,
+  onByteToLineMapChange,
   onLogEntry,
   onOrgValueChange,
   disabled = false
@@ -38,6 +40,9 @@ export const AssemblePass2 = ({
     
     // Update binary data with machine code
     onBinaryDataChange(result.machineCode);
+    
+    // Update byte-to-line mapping
+    onByteToLineMapChange(result.byteToLineMap);
     
     // Display errors if any
     if (result.errors.length > 0) {

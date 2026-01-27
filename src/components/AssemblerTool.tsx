@@ -23,7 +23,7 @@ export const AssemblerTool = () => {
   const [cursorPosition, setCursorPosition] = useState<number>(0);
   const [pass1Run, setPass1Run] = useState<boolean>(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
-  const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue } = useBinaryData();
+  const { binaryData, setBinaryData, assemblyCode, setAssemblyCode, setOrgValue, byteToLineMap, setByteToLineMap, highlightedLine, setHighlightedLine } = useBinaryData();
 
   const addLogEntry = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -492,11 +492,13 @@ end Behavioral;`;
                       setAssemblyCode(e.target.value);
                       setCursorPosition(e.target.selectionStart);
                       setPass1Run(false);
+                      setHighlightedLine(null);
                     }}
                     onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
                     placeholder="Upload or enter TBIL assembly code here..."
                     className="font-mono text-sm bg-code-bg border-code-border"
                     errorLines={errorLines}
+                    highlightedLine={highlightedLine}
                   />
                 </div>
               </Card>
@@ -533,6 +535,12 @@ end Behavioral;`;
                     onChange={setBinaryData}
                     readOnly
                     className="w-full"
+                    byteToLineMap={byteToLineMap}
+                    onByteClick={(byteIndex, lineNumber) => {
+                      if (lineNumber) {
+                        setHighlightedLine(lineNumber);
+                      }
+                    }}
                   />
                 </div>
               </Card>
@@ -557,6 +565,7 @@ end Behavioral;`;
                   assemblyCode={assemblyCode}
                   pass1Result={pass1Result}
                   onBinaryDataChange={setBinaryData}
+                  onByteToLineMapChange={setByteToLineMap}
                   onLogEntry={addLogEntry}
                   onOrgValueChange={setOrgValue}
                 />

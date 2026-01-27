@@ -273,6 +273,7 @@ export function pass1(assemblyCode: string): Pass1Result {
 
 export interface Pass2Result {
   machineCode: Uint8Array;
+  byteToLineMap: Map<number, number>; // Maps byte address to source line number
   errorCount: number;
   errors: string[];
   finalOrgValue: number;
@@ -301,7 +302,8 @@ function processPass2Line(
   lineNumber: number,
   orgValue: number,
   labelDictionary: Record<string, LabelEntry>,
-  machineCode: Uint8Array
+  machineCode: Uint8Array,
+  byteToLineMap: Map<number, number>
 ): { newOrgValue: number; error: string | null } {
   
   // Extract label if present
@@ -670,6 +672,7 @@ function processPass2Line(
 
 export function pass2(assemblyCode: string, labelDictionary: Record<string, LabelEntry>): Pass2Result {
   const machineCode = new Uint8Array(65536);
+  const byteToLineMap = new Map<number, number>();
   const errors: string[] = [];
   let errorCount = 0;
   let orgValue = 0;
@@ -701,19 +704,27 @@ export function pass2(assemblyCode: string, labelDictionary: Record<string, Labe
     });
     lineString = tempLine;
     
+    // Track starting org value to map bytes to this line
+    const startingOrgValue = orgValue;
+    
     // Process the line
-    const { newOrgValue, error } = processPass2Line(lineString, lineNumber, orgValue, labelDictionary, machineCode);
+    const { newOrgValue, error } = processPass2Line(lineString, lineNumber, orgValue, labelDictionary, machineCode, byteToLineMap);
     
     if (error) {
       errors.push(`Line ${lineNumber}: ${error}`);
       errorCount++;
     } else {
+      // Map all bytes written by this line to the line number
+      for (let addr = startingOrgValue; addr < newOrgValue; addr++) {
+        byteToLineMap.set(addr, lineNumber);
+      }
       orgValue = newOrgValue;
     }
   }
   
   return {
     machineCode,
+    byteToLineMap,
     errorCount,
     errors,
     finalOrgValue: orgValue
