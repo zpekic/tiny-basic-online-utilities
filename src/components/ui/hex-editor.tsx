@@ -7,17 +7,23 @@ export interface HexEditorProps {
   onChange?: (data: Uint8Array) => void;
   className?: string;
   readOnly?: boolean;
+  byteToLineMap?: Map<number, number>;
+  onByteClick?: (byteIndex: number, lineNumber: number | undefined) => void;
 }
 
 const HexEditor = React.forwardRef<HTMLDivElement, HexEditorProps>(
-  ({ data, onChange, className, readOnly = false }, ref) => {
+  ({ data, onChange, className, readOnly = false, byteToLineMap, onByteClick }, ref) => {
     const [selectedByte, setSelectedByte] = React.useState<number | null>(null);
     const bytesPerRow = 16;
     const rows = Math.ceil(data.length / bytesPerRow);
 
     const handleByteClick = (index: number) => {
-      if (!readOnly) {
-        setSelectedByte(index);
+      setSelectedByte(index);
+      
+      // Call the onByteClick callback with line number if available
+      if (onByteClick && byteToLineMap) {
+        const lineNumber = byteToLineMap.get(index);
+        onByteClick(index, lineNumber);
       }
     };
 
@@ -88,18 +94,21 @@ const HexEditor = React.forwardRef<HTMLDivElement, HexEditorProps>(
                         return <span key={colIndex} className="w-6" />;
                       }
 
+                      const hasLineMapping = byteToLineMap?.has(byteIndex);
+                      
                       return (
                         <span
                           key={colIndex}
                           className={cn(
-                            "w-6 text-center cursor-pointer transition-colors",
+                            "w-6 text-center transition-colors",
                             isSelected && "bg-primary text-primary-foreground rounded",
-                            !readOnly && "hover:bg-accent hover:text-accent-foreground",
-                            readOnly && "cursor-default"
+                            hasLineMapping && "cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                            !hasLineMapping && "cursor-default",
+                            !readOnly && "hover:bg-accent hover:text-accent-foreground"
                           )}
                           onClick={() => handleByteClick(byteIndex)}
                           onKeyDown={(e) => handleKeyDown(e, byteIndex)}
-                          tabIndex={readOnly ? -1 : 0}
+                          tabIndex={hasLineMapping || !readOnly ? 0 : -1}
                         >
                           {byte !== undefined ? byte.toString(16).padStart(2, "0").toUpperCase() : ""}
                         </span>
