@@ -40,6 +40,9 @@ Any string starting with `//`. Removed during processing.
 ### Target
 Must be valid key in `label_dictionary`. `target_value` equals stored `org_value`. Must be in range 0-2047.
 
+### Target8
+Must be a valid key in `label_dictionary`. `target8_value` equals `label_org - current_org`. Must be in range 0-255.
+
 ### Relative Branch
 Valid label or `*` (asterisk). If `*`, value is 0. Otherwise:
 - `relativebranch_value = label_org - current_org + 31`
@@ -93,6 +96,7 @@ The assembler recognizes the following instructions:
 | `FS` | 1 | 0x25 |
 | `FE` | 1 | 0x26 |
 | `GL` | 1 | 0x27 |
+| `SA target8` | 2 | 0x28 + target8_value |
 | `IL` | 1 | 0x2A |
 | `MT` | 1 | 0x2B |
 | `XQ` | 1 | 0x2C |
