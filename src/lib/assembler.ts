@@ -178,6 +178,10 @@ function processPass1Line(
         return { newOrgValue: orgValue + 3, error: null };
       
       // Jump instructions
+      case 'SA':
+        if (parts.length < 2) throw new Error('SA requires a target8 label');
+        return { newOrgValue: orgValue + 2, error: null };
+      
       case 'JS': case 'J':
         if (parts.length < 2) throw new Error(`${instruction} requires a target`);
         // Target validation will be done in Pass 2
@@ -484,6 +488,22 @@ function processPass2Line(
       case 'RT':
         machineCode[orgValue] = 0x2F;
         return { newOrgValue: orgValue + 1, error: null };
+      
+      // SA instruction (target8)
+      case 'SA': {
+        if (parts.length < 2) throw new Error('SA requires a target8 label');
+        const target8Label = parts[1].toUpperCase();
+        if (!labelDictionary[target8Label]) {
+          throw new Error(`Target8 label not found: ${target8Label}`);
+        }
+        const target8Value = labelDictionary[target8Label].org_value - orgValue;
+        if (target8Value < 0 || target8Value > 255) {
+          throw new Error(`Target8 value out of range (0-255): ${target8Value}`);
+        }
+        machineCode[orgValue] = 0x28;
+        machineCode[orgValue + 1] = target8Value;
+        return { newOrgValue: orgValue + 2, error: null };
+      }
       
       // Two-byte instructions
       case 'LB': {
