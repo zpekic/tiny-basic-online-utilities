@@ -496,7 +496,7 @@ function processPass2Line(
         if (!labelDictionary[target8Label]) {
           throw new Error(`Target8 label not found: ${target8Label}`);
         }
-        const target8Value = labelDictionary[target8Label].org_value - orgValue;
+        const target8Value = labelDictionary[target8Label].org_value - (orgValue + 1);
         if (target8Value < 0 || target8Value > 255) {
           throw new Error(`Target8 value out of range (0-255): ${target8Value}`);
         }
